@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CivilKit</title>
+<meta name="description" content="All-in-one toolkit for civil engineers, architects and draughtsmen">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f5fa8">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#14202e;--mut:#5c6b7d;--line:#dde3ea;--pri:#0f5fa8;--pri2:#e6f0fa;--ok:#14915a;--warn:#c27a00;--bad:#c62828;--stage:#0b1118}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e141b;--card:#17202b;--ink:#e8eef5;--mut:#93a3b5;--line:#2a3644;--pri:#5aa7f0;--pri2:#1b2d42;--ok:#3ccf8a;--warn:#f0b040;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0e141b;--card:#17202b;--ink:#e8eef5;--mut:#93a3b5;--line:#2a3644;--pri:#5aa7f0;--pri2:#1b2d42;--ok:#3ccf8a;--warn:#f0b040;--bad:#ff6b6b}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:var(--pri);color:#fff}
+header h1{flex:1;margin:0;font-size:18px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:rgba(255,255,255,.15);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:22px;cursor:pointer}
+main{max-width:900px;margin:0 auto;padding:14px 16px 40px}
+.search{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:16px;margin-bottom:6px}
+.cat{margin:18px 0 8px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;text-align:left;color:var(--ink);font:inherit}
+.tile:active{transform:scale(.98)}
+.tile .ic{font-size:26px;line-height:1}
+.tile b{font-size:14.5px}
+.tile small{color:var(--mut);font-size:12px;line-height:1.3}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:16px}
+.form{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut)}
+.fld em{font-style:normal;color:var(--pri)}
+input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:16px}
+.res .r{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.res .r span{color:var(--mut)}
+.res .r b{text-align:right}
+.res .sep{margin-top:10px;font-weight:700;color:var(--pri);font-size:13px;text-transform:uppercase;letter-spacing:.03em}
+.note{color:var(--mut);font-size:13px;margin-top:8px}
+.info{font-size:13.5px;color:var(--mut)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{padding:11px 16px;border-radius:11px;border:0;background:var(--pri);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:var(--pri2);color:var(--pri)}
+.btn.big{width:100%;padding:15px;font-size:16px}
+.btn:disabled{opacity:.45}
+.seg{display:flex;background:var(--pri2);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;color:var(--pri);font-weight:600;cursor:pointer}
+.seg button.on{background:var(--pri);color:#fff}
+.stage{position:relative;width:100%;height:min(62vh,560px);background:var(--stage);border-radius:14px;overflow:hidden;touch-action:none}
+.stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage .tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;padding:6px 10px;border-radius:9px;font-size:13px}
+canvas.big{width:100%;height:min(55vh,460px);display:block;background:var(--card);border-radius:14px;border:1px solid var(--line);touch-action:none}
+.readout{text-align:center;margin:10px 0}
+.huge{font-size:44px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.1}
+.sub{color:var(--mut);font-variant-numeric:tabular-nums}
+.warn{color:var(--warn)} .bad{color:var(--bad)} .good{color:var(--ok)}
+.hint{font-size:13px;color:var(--mut)}
+details summary{cursor:pointer;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{border-bottom:1px solid var(--line);padding:6px 5px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600}
+.tscroll{overflow-x:auto}
+.lv input{padding:7px;font-size:15px;min-width:64px}
+.lv td{padding:3px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.kv small{display:block;color:var(--mut);font-size:12px}
+.kv b{font-size:18px;font-variant-numeric:tabular-nums}
+#arOverlay{position:fixed;inset:0;z-index:100}
+#arOverlay[hidden]{display:none}
+#arCv{position:absolute;inset:0;width:100%;height:100%}
+#arTop{position:absolute;left:0;right:0;top:0;padding:14px;padding-top:max(14px,env(safe-area-inset-top));text-align:center;color:#fff;text-shadow:0 1px 3px #000;font:600 16px system-ui}
+#arTop .big{font-size:30px}
+#arCtrl{position:absolute;left:0;right:0;bottom:0;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:16px;padding-bottom:max(16px,env(safe-area-inset-bottom))}
+#arCtrl button{padding:12px 16px;border-radius:30px;border:0;background:rgba(0,0,0,.6);color:#fff;font:600 15px system-ui}
+#arCtrl button.add{background:#0f5fa8;font-size:17px;padding:14px 22px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:10px;z-index:200;font-size:14px;max-width:90vw}
+</style>
+</head>
+<body>
+<header><button id="back" aria-label="Back" hidden>‹</button><h1 id="title">CivilKit</h1><button id="themeBtn" aria-label="Theme">☾</button></header>
+<main id="app"></main>
+<div id="arOverlay" hidden><canvas id="arCv"></canvas><div id="arTop"></div><div id="arCtrl"></div></div>
+<script>
+'use strict';
+/* ================= helpers ================= */
+const APP_VERSION='1.1.0';
+const $=(s,r=document)=>r.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem('ck_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('ck_'+k,JSON.stringify(v))}catch(e){}}};
+const deg=r=>r*180/Math.PI, rad=d=>d*Math.PI/180, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ok=n=>typeof n==='number'&&isFinite(n);
+function fmt(n,d=2){if(!ok(n))return '—';return Number(n).toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:0})}
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function toast(m,t=2200){const d=document.createElement('div');d.className='toast';d.textContent=m;document.body.appendChild(d);setTimeout(()=>d.remove(),t)}
+function fitCanvas(cv){const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return{c,w:r.width,h:r.height}}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+async function shareText(title,text){try{if(navigator.share){await navigator.share({title,text});return}}catch(e){if(e.name==='AbortError')return}try{await navigator.clipboard.writeText(text);toast('Copied to clipboard')}catch(e){toast('Could not copy')}}
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+function fmtLen(m,u){if(!ok(m))return '—';if(u==='cm')return (m*100).toFixed(1)+' cm';if(u==='ftin'){let tin=m/0.0254,ft=Math.floor(tin/12),inch=tin-ft*12;if(inch>=11.95){ft++;inch=0}return ft+'′ '+inch.toFixed(1)+'″'}if(u==='in')return (m/0.0254).toFixed(1)+' in';return m.toFixed(2)+' m'}
+const vol=m3=>`${fmt(m3,3)} m³ · ${fmt(m3*35.3147,2)} cft`;
+
+/* ---- sensors ---- */
+const needsPerm=()=>typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function';
+async function askMotionPerm(){try{if(needsPerm()){const r=await DeviceMotionEvent.requestPermission();if(r!=='granted')return false}if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){await DeviceOrientationEvent.requestPermission()}return true}catch(e){return false}}
+function screenAngle(){return (screen.orientation&&screen.orientation.angle)||window.orientation||0}
+/* gravity in SCREEN coords: x right, y up, z out of screen (reaction to gravity: points "up") */
+function gravity(cb,k=0.18){let got=false;const f={x:0,y:0,z:9.81};let first=true;
+ const hnd=e=>{const a=e.accelerationIncludingGravity;if(!a||a.x==null)return;got=true;const s=IOS?-1:1;const kk=first?1:k;first=false;
+  f.x+=(s*a.x-f.x)*kk;f.y+=(s*a.y-f.y)*kk;f.z+=(s*a.z-f.z)*kk;
+  const th=rad(screenAngle());const sx=f.x*Math.cos(th)-f.y*Math.sin(th),sy=f.x*Math.sin(th)+f.y*Math.cos(th);
+  cb({x:sx,y:sy,z:f.z,n:Math.hypot(f.x,f.y,f.z)})};
+ window.addEventListener('devicemotion',hnd);return{stop:()=>window.removeEventListener('devicemotion',hnd),got:()=>got}}
+/* show start button where iOS needs permission; else start right away. startFn returns a stop fn */
+function sensorGate(box,startFn,noSensorMsg){let stop=null,timer=null,g=null;
+ const run=async()=>{if(needsPerm()&&!(await askMotionPerm())){box.innerHTML='<p class="bad">Motion sensor permission was denied.</p>';return}box.innerHTML='';const r=startFn();stop=r.stop;g=r.got;
+  timer=setTimeout(()=>{if(g&&!g())box.innerHTML='<p class="warn">'+(noSensorMsg||'No motion sensor found. Open this tool on a phone or tablet.')+'</p>'},2500)};
+ const showBtn=()=>{box.innerHTML='<button class="btn big">Start sensors</button>';box.firstChild.onclick=run};
+ if(needsPerm()){Promise.resolve().then(()=>DeviceMotionEvent.requestPermission()).then(r=>{if(r==='granted')run();else showBtn()}).catch(showBtn)}else run();
+ return()=>{clearTimeout(timer);stop&&stop()}}
+async function openCamera(video){const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});video.setAttribute('playsinline','');video.muted=true;video.srcObject=s;try{await video.play()}catch(e){}return s}
+const stopStream=s=>{if(s)s.getTracks().forEach(t=>t.stop())};
+function camErr(e){return e&&e.name==='NotAllowedError'?'Camera permission denied. Allow camera in browser settings.':(location.protocol!=='https:'&&location.hostname!=='localhost'?'Camera needs HTTPS (e.g. GitHub Pages link).':'Camera not available: '+(e&&e.message||e))}
+
+/* ================= calculator builder ================= */
+const LU=[['m','Metre (m)'],['ft','Feet (ft)']];
+const lf=v=>v.u==='ft'?0.3048:1, ul=v=>v.u==='ft'?'ft':'m', ua=v=>v.u==='ft'?'ft²':'m²';
+const MIXES=[['1:3:6','M10 (1:3:6)'],['1:2:4','M15 (1:2:4)'],['1:1.5:3','M20 (1:1.5:3)'],['1:1:2','M25 (1:1:2)*'],['1:4:8','M7.5 (1:4:8)'],['1:5:10','M5 (1:5:10)']];
+function calcTool(spec){return el=>{
+ const key='calc_'+spec.id,saved=store.get(key,{}),v={};
+ spec.fields.forEach(f=>v[f.k]=saved[f.k]!==undefined&&saved[f.k]!==null?saved[f.k]:f.def);
+ el.innerHTML=`<div class="card"><div class="form"></div></div><div class="card"><h3>Result</h3><div class="res"></div><div class="note"></div><div class="row"><button class="btn share">Share / Copy</button><button class="btn ghost reset">Reset inputs</button></div></div>${spec.info?`<details class="card"><summary>Method &amp; formula</summary><div class="info">${spec.info}</div></details>`:''}`;
+ const form=$('.form',el),res=$('.res',el),note=$('.note',el);let text='';
+ form.innerHTML=spec.fields.map(f=>{const inp=f.type==='sel'?`<select data-k="${f.k}">${f.opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`:`<input data-k="${f.k}" type="number" inputmode="decimal" step="any">`;return `<label class="fld" data-k="${f.k}"><span>${f.label} <em></em></span>${inp}</label>`}).join('');
+ const upd=()=>{spec.fields.forEach(f=>{const lab=$(`label[data-k="${f.k}"]`,form);lab.style.display=(!f.when||f.when(v))?'':'none';$('em',lab).textContent=f.unit?(typeof f.unit==='function'?f.unit(v):f.unit):''});
+  let out;try{out=spec.calc(v)}catch(e){out=[['Error',e.message]]}if(Array.isArray(out))out={rows:out};
+  res.innerHTML=out.rows.map(r=>r[0]==='#'?`<div class="sep">${r[1]}</div>`:`<div class="r"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+  note.innerHTML=out.note||'';store.set(key,v);
+  text=spec.name+'\n'+spec.fields.filter(f=>!f.when||f.when(v)).map(f=>{let val=v[f.k];if(f.type==='sel'){const o=f.opts.find(o=>o[0]==val);val=o?o[1]:val}return f.label+': '+val+(f.unit?' '+(typeof f.unit==='function'?f.unit(v):f.unit):'')}).join('\n')+'\n--\n'+out.rows.map(r=>r[0]==='#'?'['+r[1]+']':r[0]+': '+String(r[1]).replace(/<[^>]+>/g,'')).join('\n')+'\n(CivilKit)'};
+ spec.fields.forEach(f=>{const i=$(`[data-k="${f.k}"]`,form);i.value=v[f.k];i.addEventListener('input',()=>{v[f.k]=f.type==='sel'?i.value:(i.value===''?NaN:parseFloat(i.value));upd()})});
+ $('.share',el).onclick=()=>shareText(spec.name,text);
+ $('.reset',el).onclick=()=>{spec.fields.forEach(f=>{v[f.k]=f.def;$(`[data-k="${f.k}"]`,form).value=f.def});upd()};
+ upd()}}
+const mixParts=m=>m.split(':').map(Number);
+const chk=(c,t)=>c?`<span class="good">✓ ${t}</span>`:`<span class="warn">⚠ ${t}</span>`;
+
+/* ================= TOOL: AR TAPE ================= */
+function arTool(el){
+ el.innerHTML=`<div class="card"><h3>AR Tape Measure</h3><p class="hint">Measures real distances in 3D using your phone's camera + motion tracking (Google ARCore / WebXR). Works in Chrome on ARCore-supported Android phones.</p>
+ <div id="arStat" class="note">Checking AR support…</div><button id="arGo" class="btn big" disabled>Start AR measuring</button></div>
+ <div class="card"><h3>How to use</h3><ol class="hint"><li>Tap Start, then slowly move the phone so it can detect the floor/wall (dots/circle appear).</li><li>Point the centre ring at the first corner and tap <b>＋ Point</b>.</li><li>Move to the next corner and tap again. Each segment length and the total are shown.</li><li><b>New line</b> starts a separate measurement. Good light and textured surfaces give best accuracy (typically ±1–2 cm per metre).</li></ol></div>
+ <div class="card" id="arLog" hidden><h3>Last session</h3><div class="res"></div><div class="row"><button class="btn share">Share / Copy</button></div></div>
+ <div class="card"><h3>No AR on your phone?</h3><p class="hint">Use <b>Camera Distance &amp; Height</b> (works on every phone using tilt angle + your holding height).</p><button class="btn ghost" onclick="location.hash='camdist'">Open Camera Distance &amp; Height</button></div>`;
+ const stat=$('#arStat',el),go=$('#arGo',el);let sess=null,lastText='';
+ (async()=>{try{if(navigator.xr&&await navigator.xr.isSessionSupported('immersive-ar')){stat.innerHTML='<span class="good">✓ AR is supported on this device.</span>';go.disabled=false}else stat.innerHTML='<span class="warn">AR (WebXR) is not supported in this browser/device. Use Chrome on an ARCore-supported Android phone, opened from an HTTPS link.</span>'}catch(e){stat.textContent='AR check failed: '+e.message}})();
+ go.onclick=async()=>{try{sess=await startAR(lines=>{const log=$('#arLog',el);const rs=[];let txt='AR measurements\n';lines.forEach((L,i)=>{if(L.length<2)return;let tot=0;for(let j=1;j<L.length;j++)tot+=dist3(L[j-1],L[j]);rs.push(['Line '+(i+1)+' ('+(L.length-1)+' seg)',fmtLen(tot,'m')+' · '+fmtLen(tot,'ftin')]);txt+='Line '+(i+1)+': '+fmtLen(tot,'m')+' ('+fmtLen(tot,'ftin')+')\n'});if(rs.length){log.hidden=false;$('.res',log).innerHTML=rs.map(r=>`<div class="r"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');lastText=txt}})}catch(e){stat.innerHTML='<span class="bad">Could not start AR: '+e.message+'</span>'}};
+ $('#arLog .share',el).onclick=()=>shareText('AR measurements',lastText);
+ return()=>{if(sess)try{sess.end()}catch(e){}}}
+const dist3=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+function project(p,P,V,W,H){const x=p.x,y=p.y,z=p.z;
+ const vx=V[0]*x+V[4]*y+V[8]*z+V[12],vy=V[1]*x+V[5]*y+V[9]*z+V[13],vz=V[2]*x+V[6]*y+V[10]*z+V[14],vw=V[3]*x+V[7]*y+V[11]*z+V[15];
+ const cx=P[0]*vx+P[4]*vy+P[8]*vz+P[12]*vw,cy=P[1]*vx+P[5]*vy+P[9]*vz+P[13]*vw,cw=P[3]*vx+P[7]*vy+P[11]*vz+P[15]*vw;
+ if(cw<=1e-4)return null;return{x:(cx/cw+1)/2*W,y:(1-cy/cw)/2*H}}
+async function startAR(onEnd){
+ const ov=$('#arOverlay'),cv=$('#arCv'),top=$('#arTop'),ctrl=$('#arCtrl');ov.hidden=false;
+ const units=['m','cm','ftin','in'];let ui=0;
+ ctrl.innerHTML='<button data-a="undo">Undo</button><button data-a="new">New line</button><button class="add" data-a="add">＋ Point</button><button data-a="unit">Unit</button><button data-a="exit">Exit</button>';
+ let session;
+ try{session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test','local'],optionalFeatures:['dom-overlay'],domOverlay:{root:ov}})}catch(e){ov.hidden=true;throw e}
+ const glc=document.createElement('canvas');const gl=glc.getContext('webgl',{xrCompatible:true,alpha:true});
+ if(gl.makeXRCompatible)await gl.makeXRCompatible();
+ session.updateRenderState({baseLayer:new XRWebGLLayer(session,gl)});
+ const local=await session.requestReferenceSpace('local'),viewer=await session.requestReferenceSpace('viewer');
+ const hts=await session.requestHitTestSource({space:viewer});
+ const lines=[[]];let ret=null;
+ const add=()=>{if(ret){lines[lines.length-1].push({x:ret.x,y:ret.y,z:ret.z});if(navigator.vibrate)navigator.vibrate(20)}};
+ ctrl.addEventListener('beforexrselect',e=>e.preventDefault());
+ ctrl.onclick=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='add')add();else if(a==='undo'){const L=lines[lines.length-1];if(L.length)L.pop();else if(lines.length>1)lines.pop()}else if(a==='new'){if(lines[lines.length-1].length)lines.push([])}else if(a==='unit')ui=(ui+1)%units.length;else if(a==='exit')session.end()};
+ session.addEventListener('select',add);
+ session.addEventListener('end',()=>{ov.hidden=true;ctrl.onclick=null;try{hts.cancel()}catch(e){}onEnd&&onEnd(lines)});
+ const onFrame=(t,frame)=>{session.requestAnimationFrame(onFrame);
+  const layer=session.renderState.baseLayer;gl.bindFramebuffer(gl.FRAMEBUFFER,layer.framebuffer);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const pose=frame.getViewerPose(local);const {c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);
+  if(!pose){top.innerHTML='Move phone slowly to start tracking…';return}
+  const view=pose.views[0],P=view.projectionMatrix,V=view.transform.inverse.matrix;
+  const hits=frame.getHitTestResults(hts);ret=hits.length?hits[0].getPose(local).transform.position:null;
+  const u=units[ui],pr=p=>project(p,P,V,w,h);
+  c.lineWidth=3;c.font='600 15px system-ui';c.textAlign='center';c.textBaseline='middle';
+  const label=(a,b,txt)=>{if(!a||!b)return;const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;const tw=c.measureText(txt).width+14;c.fillStyle='rgba(0,0,0,.7)';c.beginPath();c.roundRect?c.roundRect(mx-tw/2,my-13,tw,26,13):c.rect(mx-tw/2,my-13,tw,26);c.fill();c.fillStyle='#fff';c.fillText(txt,mx,my)};
+  lines.forEach((L,li)=>{const cur=li===lines.length-1;for(let j=0;j<L.length;j++){const s=pr(L[j]);if(s){c.fillStyle='#fff';c.beginPath();c.arc(s.x,s.y,7,0,7);c.fill();c.fillStyle='#0f5fa8';c.beginPath();c.arc(s.x,s.y,4,0,7);c.fill()}
+   if(j>0){const a=pr(L[j-1]);if(a&&s){c.strokeStyle=cur?'#ffd400':'#7fd1ff';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(s.x,s.y);c.stroke();label(a,s,fmtLen(dist3(L[j-1],L[j]),u))}}}});
+  const L=lines[lines.length-1];let tot=0;for(let j=1;j<L.length;j++)tot+=dist3(L[j-1],L[j]);
+  let live=null;
+  if(ret){const rs=pr(ret);if(rs){c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.arc(rs.x,rs.y,18,0,7);c.stroke();c.beginPath();c.arc(rs.x,rs.y,3,0,7);c.fillStyle='#fff';c.fill();
+   if(L.length){const a=pr(L[L.length-1]);live=dist3(L[L.length-1],ret);if(a){c.setLineDash([8,6]);c.strokeStyle='#ffd400';c.beginPath();c.moveTo(a.x,a.y);c.lineTo(rs.x,rs.y);c.stroke();c.setLineDash([]);label(a,rs,fmtLen(live,u))}}}}
+  else{c.strokeStyle='rgba(255,255,255,.6)';c.beginPath();c.moveTo(w/2-14,h/2);c.lineTo(w/2+14,h/2);c.moveTo(w/2,h/2-14);c.lineTo(w/2,h/2+14);c.stroke()}
+  top.innerHTML=!ret?'Looking for a surface… move phone slowly':(L.length?`<div class="big">${fmtLen(live!=null?tot+live:tot,u)}</div>Total of this line${L.length>1?' · '+(L.length-1)+' segment(s)':''}`:'Aim the ring at a point and tap ＋ Point');
+ };
+ session.requestAnimationFrame(onFrame);return session}
+
+/* ================= TOOL: CAMERA DISTANCE & HEIGHT ================= */
+function camDistTool(el){
+ const hSaved=store.get('camh',1.5);
+ el.innerHTML=`<div class="stage"><video></video><canvas></canvas><div class="tag" id="tg">Aim the cross at the BASE of the object</div></div>
+ <div class="card"><div class="form"><label class="fld"><span>Camera height above ground <em>m</em></span><input id="hh" type="number" step="0.01" inputmode="decimal" value="${hSaved}"></label><label class="fld"><span>Display unit</span><select id="uu"><option value="m">Metre</option><option value="ftin">Feet-inch</option></select></label></div>
+ <div class="kv" style="margin-top:10px"><div><small>Tilt angle</small><b id="an">—</b></div><div><small>Distance (live)</small><b id="dl">—</b></div><div><small>Locked distance</small><b id="dd">—</b></div><div><small>Object height</small><b id="ht">—</b></div></div>
+ <div class="row"><button class="btn" id="b1">① Lock base → distance</button><button class="btn" id="b2" disabled>② Lock top → height</button><button class="btn ghost" id="b3">Reset</button></div>
+ <div id="gate"></div><p class="hint">Hold the phone upright at eye level and stand on level ground. Measure your camera height once with a tape (usually 1.4–1.6 m) for accurate results. Method: distance = h ÷ tan(angle down); height = h + distance × tan(angle up).</p></div>`;
+ const video=$('video',el),cv=$('canvas',el);let stream=null,elev=NaN,roll=0,dLock=NaN,run=true;
+ openCamera(video).then(s=>{stream=s;if(!run)stopStream(s)}).catch(e=>$('#tg',el).textContent=camErr(e));
+ const H=()=>{const v=parseFloat($('#hh',el).value);if(ok(v))store.set('camh',v);return v};
+ const stopS=sensorGate($('#gate',el),()=>gravity(g=>{elev=deg(Math.asin(clamp(-g.z/g.n,-1,1)));roll=deg(Math.atan2(g.x,g.y))}));
+ const u=()=>$('#uu',el).value;
+ $('#b1',el).onclick=()=>{const h=H(),dep=-elev;if(!(dep>1)){toast('Tilt the phone DOWN to aim at the base');return}dLock=h/Math.tan(rad(dep));$('#dd',el).textContent=fmtLen(dLock,u());$('#b2',el).disabled=false;$('#tg',el).textContent='Now aim at the TOP of the object';if(navigator.vibrate)navigator.vibrate(30)};
+ $('#b2',el).onclick=()=>{const h=H();const Ht=h+dLock*Math.tan(rad(elev));$('#ht',el).textContent=fmtLen(Ht,u());if(navigator.vibrate)navigator.vibrate(30)};
+ $('#b3',el).onclick=()=>{dLock=NaN;$('#dd',el).textContent='—';$('#ht',el).textContent='—';$('#b2',el).disabled=true;$('#tg',el).textContent='Aim the cross at the BASE of the object'};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);
+  c.strokeStyle='#ffd400';c.lineWidth=2;c.beginPath();c.moveTo(w/2-30,h/2);c.lineTo(w/2+30,h/2);c.moveTo(w/2,h/2-30);c.lineTo(w/2,h/2+30);c.stroke();c.beginPath();c.arc(w/2,h/2,6,0,7);c.stroke();
+  if(ok(elev)){$('#an',el).textContent=(elev>=0?'▲ ':'▼ ')+Math.abs(elev).toFixed(1)+'°';const dep=-elev;$('#dl',el).textContent=dep>1?fmtLen(H()/Math.tan(rad(dep)),u()):'aim lower';
+   if(Math.abs(roll)>6){c.fillStyle='rgba(198,40,40,.85)';c.fillRect(0,h-34,w,34);c.fillStyle='#fff';c.font='600 14px system-ui';c.textAlign='center';c.fillText('Hold phone straight (not sideways)',w/2,h-12)}}};
+ loop();return()=>{run=false;stopStream(stream);stopS()}}
+
+/* ================= TOOL: CLINOMETER ================= */
+function clinoTool(el){
+ el.innerHTML=`<div class="stage"><video></video><canvas></canvas><div class="tag">Aim along the slope / at the target</div></div>
+ <div class="readout"><div class="huge" id="a">—</div><div class="sub" id="b"></div></div>
+ <div class="row" style="justify-content:center"><button class="btn" id="hold">Hold</button><button class="btn ghost" id="cal">Calibrate zero</button><button class="btn ghost" id="cr">Clear cal.</button></div>
+ <div id="gate"></div><p class="hint">Look through the camera along a ramp, roof or road, or place the phone's long edge on the surface. Shows angle, gradient % and ratio (1 in n). Calibrate: aim at a known-level line (e.g. a water-level mark) and tap Calibrate.</p>`;
+ const video=$('video',el),cv=$('canvas',el);let stream=null,run=true,el_=NaN,held=false,cal=store.get('clcal',0);
+ openCamera(video).then(s=>{stream=s;if(!run)stopStream(s)}).catch(()=>{});
+ const stopS=sensorGate($('#gate',el),()=>gravity(g=>{if(!held)el_=deg(Math.asin(clamp(-g.z/g.n,-1,1)))}));
+ $('#hold',el).onclick=e=>{held=!held;e.target.textContent=held?'Release':'Hold'};
+ $('#cal',el).onclick=()=>{if(ok(el_)){cal=el_;store.set('clcal',cal);toast('Zero set')}};$('#cr',el).onclick=()=>{cal=0;store.set('clcal',0)};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const a=el_-cal;
+  c.strokeStyle='#ffd400';c.lineWidth=2;c.beginPath();c.moveTo(0,h/2);c.lineTo(w,h/2);c.stroke();
+  if(ok(a)){c.save();c.translate(w/2,h/2);c.rotate(rad(a));c.strokeStyle='rgba(255,255,255,.7)';c.setLineDash([10,8]);c.beginPath();c.moveTo(-w,0);c.lineTo(w,0);c.stroke();c.restore();
+   const t=Math.tan(rad(Math.abs(a)));$('#a',el).textContent=(a>=0?'▲ ':'▼ ')+Math.abs(a).toFixed(1)+'°';$('#b',el).innerHTML=`Gradient ${fmt(t*100,1)} % &nbsp;·&nbsp; 1 in ${Math.abs(a)<0.05?'∞':fmt(1/t,1)} &nbsp;·&nbsp; ${fmt(t*1000,0)} mm/m${held?' &nbsp;<b class="warn">HELD</b>':''}`}};
+ loop();return()=>{run=false;stopStream(stream);stopS()}}
+
+/* ================= TOOL: LEVEL ================= */
+function levelTool(el){
+ el.innerHTML=`<div class="seg"><button data-m="surface" class="on">Surface (flat)</button><button data-m="edge">Edge / Plumb</button></div>
+ <canvas class="big"></canvas><div class="readout"><div class="huge" id="r1">—</div><div class="sub" id="r2"></div></div>
+ <div class="row" style="justify-content:center"><button class="btn" id="cal">Calibrate</button><button class="btn ghost" id="rst">Reset cal.</button><button class="btn ghost" id="hold">Hold</button></div>
+ <div id="gate"></div><p class="hint"><b>Surface:</b> lay the phone flat on a slab, tile or table. <b>Edge/Plumb:</b> hold the phone's long or short edge against a wall, column, door frame or beam to check level/plumb. For best accuracy calibrate once on a level surface: tap Calibrate, rotate the phone 180° in the same spot, and check it reads the same.</p>`;
+ const cv=$('canvas',el);let mode='surface',g=null,run=true,held=false,wasLevel=false;let cal=store.get('lvcal',{sx:0,sy:0,e:0});
+ el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;el.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b))});
+ const stopS=sensorGate($('#gate',el),()=>gravity(v=>{if(!held)g=v},0.1));
+ const ang=()=>{if(!g)return null;const sx=deg(Math.atan2(g.x,g.z))-cal.sx,sy=deg(Math.atan2(g.y,g.z))-cal.sy;const a=deg(Math.atan2(g.x,g.y));const n=Math.round(a/90)*90;return{sx,sy,e:a-n-cal.e,n}};
+ $('#cal',el).onclick=()=>{if(!g)return;const sx=deg(Math.atan2(g.x,g.z)),sy=deg(Math.atan2(g.y,g.z)),a=deg(Math.atan2(g.x,g.y));if(mode==='surface'){cal.sx=sx;cal.sy=sy}else{cal.e=a-Math.round(a/90)*90}store.set('lvcal',cal);toast('Calibrated')};
+ $('#rst',el).onclick=()=>{cal={sx:0,sy:0,e:0};store.set('lvcal',cal);toast('Calibration cleared')};
+ $('#hold',el).onclick=e=>{held=!held;e.target.textContent=held?'Release':'Hold'};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const A=ang();const ink=css('--ink'),mut=css('--mut'),okc=css('--ok'),pri=css('--pri');
+  if(mode==='surface'){const R=Math.min(w,h)/2-16,cx=w/2,cy=h/2;c.strokeStyle=mut;c.lineWidth=1;[1,0.5,0.2,0.05].forEach(f=>{c.beginPath();c.arc(cx,cy,R*f,0,7);c.stroke()});c.beginPath();c.moveTo(cx-R,cy);c.lineTo(cx+R,cy);c.moveTo(cx,cy-R);c.lineTo(cx,cy+R);c.stroke();
+   c.fillStyle=mut;c.font='11px system-ui';c.fillText('10°',cx+R-22,cy-4);c.fillText('5°',cx+R*.5-14,cy-4);c.fillText('2°',cx+R*.2-12,cy-4);
+   if(A){const tot=Math.hypot(A.sx,A.sy);let bx=A.sx/10*R,by=-A.sy/10*R;const m=Math.hypot(bx,by);if(m>R-18){bx*=(R-18)/m;by*=(R-18)/m}const lvl=tot<0.3;
+    c.fillStyle=lvl?okc:pri;c.globalAlpha=.85;c.beginPath();c.arc(cx+bx,cy+by,18,0,7);c.fill();c.globalAlpha=1;
+    $('#r1',el).innerHTML=`<span class="${lvl?'good':''}">${tot.toFixed(1)}°</span>`;$('#r2',el).innerHTML=`X ${A.sx.toFixed(1)}° · Y ${A.sy.toFixed(1)}° · slope ${fmt(Math.tan(rad(tot))*1000,0)} mm/m${held?' · <b class="warn">HELD</b>':''}`;
+    if(lvl&&!wasLevel&&navigator.vibrate)navigator.vibrate(25);wasLevel=lvl}}
+  else{const cx=w/2,cy=h/2,TW=Math.min(w-40,420),TH=46;c.strokeStyle=mut;c.lineWidth=2;c.beginPath();c.roundRect?c.roundRect(cx-TW/2,cy-TH/2,TW,TH,23):c.rect(cx-TW/2,cy-TH/2,TW,TH);c.stroke();
+   c.beginPath();c.moveTo(cx-24,cy-TH/2);c.lineTo(cx-24,cy+TH/2);c.moveTo(cx+24,cy-TH/2);c.lineTo(cx+24,cy+TH/2);c.stroke();
+   if(A){const lvl=Math.abs(A.e)<0.2;const bx=clamp(A.e/5*(TW/2-24),-(TW/2-24),TW/2-24);c.fillStyle=lvl?okc:pri;c.globalAlpha=.85;c.beginPath();c.ellipse(cx+bx,cy,22,16,0,0,7);c.fill();c.globalAlpha=1;
+    c.save();c.translate(cx,cy+TH+50);c.rotate(rad(-A.e*4));c.strokeStyle=ink;c.lineWidth=2;c.beginPath();c.moveTo(-TW/2,0);c.lineTo(TW/2,0);c.stroke();c.restore();
+    const vert=(Math.abs(A.n)%180)===0;$('#r1',el).innerHTML=`<span class="${lvl?'good':''}">${Math.abs(A.e).toFixed(1)}°</span>`;$('#r2',el).innerHTML=`${vert?'Phone upright: long edge = PLUMB check':'Phone sideways: long edge = LEVEL check'} · ${fmt(Math.tan(rad(Math.abs(A.e)))*1000,1)} mm/m${held?' · <b class="warn">HELD</b>':''}`;
+    if(lvl&&!wasLevel&&navigator.vibrate)navigator.vibrate(25);wasLevel=lvl}}};
+ loop();return()=>{run=false;stopS()}}
+
+/* ================= TOOL: COMPASS ================= */
+function compassTool(el){
+ el.innerHTML=`<canvas class="big"></canvas><div class="readout"><div class="huge" id="hd">—</div><div class="sub" id="nm"></div></div>
+ <div class="row" style="justify-content:center"><button class="btn" id="lk">Lock bearing</button><button class="btn ghost" id="ul">Unlock</button></div><div class="card" style="margin-top:10px"><div class="kv"><div><small>Locked bearing</small><b id="lb">—</b></div><div><small>Angle from locked</small><b id="df">—</b></div></div>
+ <p class="hint">Magnetic bearing (add local declination for true north; in India it is about 0–1°). Keep away from steel, rebar and vehicles. If it looks wrong, move the phone in a figure-8 to calibrate. Use "Lock" on one line (e.g. plot boundary) then turn to another line to get the angle between them. Useful for plot facing direction.</p></div><div id="gate"></div>`;
+ const cv=$('canvas',el);let hd=null,run=true,lock=null;const names=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];const full={N:'North',E:'East',S:'South',W:'West',NE:'North-East',SE:'South-East',SW:'South-West',NW:'North-West'};
+ const evName='ondeviceorientationabsolute' in window?'deviceorientationabsolute':'deviceorientation';
+ const hnd=e=>{let x=null;if(e.webkitCompassHeading!=null)x=e.webkitCompassHeading;else if((e.absolute||evName==='deviceorientationabsolute')&&e.alpha!=null)x=360-e.alpha;if(x==null)return;x=(x+screenAngle()+360)%360;
+  if(hd==null)hd=x;else{let d=((x-hd+540)%360)-180;hd=(hd+d*0.2+360)%360}};
+ let started=false;const gate=$('#gate',el);
+ const start=async()=>{if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){try{if(await DeviceOrientationEvent.requestPermission()!=='granted'){gate.innerHTML='<p class="bad">Permission denied</p>';return}}catch(e){}}gate.innerHTML='';window.addEventListener(evName,hnd);started=true;setTimeout(()=>{if(hd==null)gate.innerHTML='<p class="warn">No compass (magnetometer) data. Open on a phone with a compass sensor.</p>'},3000)};
+ if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){gate.innerHTML='<button class="btn big">Start compass</button>';gate.firstChild.onclick=start}else start();
+ $('#lk',el).onclick=()=>{if(hd!=null){lock=hd;$('#lb',el).textContent=hd.toFixed(0)+'°'}};$('#ul',el).onclick=()=>{lock=null;$('#lb',el).textContent='—';$('#df',el).textContent='—'};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const R=Math.min(w,h)/2-20,cx=w/2,cy=h/2,ink=css('--ink'),mut=css('--mut');
+  c.save();c.translate(cx,cy);c.rotate(rad(-(hd||0)));for(let i=0;i<360;i+=5){const L=i%30===0?16:i%10===0?10:5;c.strokeStyle=i%90===0?css('--bad'):mut;c.lineWidth=i%30===0?2:1;c.beginPath();c.moveTo(0,-R);c.lineTo(0,-R+L);c.stroke();
+   if(i%30===0){c.save();c.translate(0,-R+32);c.rotate(rad(0));c.fillStyle=i===0?css('--bad'):ink;c.font=(i%90===0?'700 18px':'12px')+' system-ui';c.textAlign='center';c.fillText(i%90===0?['N','E','S','W'][i/90]:String(i),0,0);c.restore()}c.rotate(rad(5))}c.restore();
+  c.fillStyle=css('--bad');c.beginPath();c.moveTo(cx,cy-R-14);c.lineTo(cx-10,cy-R+4);c.lineTo(cx+10,cy-R+4);c.fill();
+  c.strokeStyle=mut;c.beginPath();c.moveTo(cx,cy-20);c.lineTo(cx,cy+20);c.moveTo(cx-20,cy);c.lineTo(cx+20,cy);c.stroke();
+  if(hd!=null){const n=names[Math.round(hd/22.5)%16];$('#hd',el).textContent=hd.toFixed(0)+'° '+n;$('#nm',el).textContent='Phone top points '+(full[n]||n);if(lock!=null){let d=((hd-lock+540)%360)-180;$('#df',el).textContent=(d>=0?'+':'')+d.toFixed(0)+'° ('+Math.abs(d).toFixed(0)+'°)'}}};
+ loop();return()=>{run=false;if(started)window.removeEventListener(evName,hnd)}}
+
+/* ================= TOOL: PROTRACTOR ================= */
+function protractorTool(el){
+ el.innerHTML=`<div class="stage" id="st"><video></video><canvas></canvas></div>
+ <div class="readout"><div class="huge" id="ang">—</div><div class="sub" id="ang2"></div></div>
+ <div class="row" style="justify-content:center"><button class="btn" id="cam">Camera: ON</button><button class="btn ghost" id="frz">Freeze</button><button class="btn ghost" id="snap">Save photo</button><button class="btn ghost" id="rs">Reset</button></div>
+ <p class="hint">Virtual protractor. Drag the 3 handles: the centre (vertex) and the two arm ends. With camera ON, line the arms up with real objects (roof pitch, bend of a bar, corner of a wall, slope of a pipe). Freeze the view, then adjust handles precisely. Save photo stamps the angle on the image.</p>`;
+ const st=$('#st',el),video=$('video',el),cv=$('canvas',el);let stream=null,run=true,camOn=true,frozen=false;
+ let P=store.get('prot',{o:[.5,.65],a:[.88,.65],b:[.3,.25]});let drag=null;
+ const startCam=()=>openCamera(video).then(s=>{stream=s;if(!run)stopStream(s)}).catch(e=>{camOn=false;$('#cam',el).textContent='Camera: OFF';toast(camErr(e),3500)});
+ startCam();
+ $('#cam',el).onclick=e=>{camOn=!camOn;e.target.textContent='Camera: '+(camOn?'ON':'OFF');if(camOn)startCam();else{stopStream(stream);stream=null;video.srcObject=null}};
+ $('#frz',el).onclick=e=>{frozen=!frozen;e.target.textContent=frozen?'Unfreeze':'Freeze';if(frozen)video.pause();else video.play().catch(()=>{})};
+ $('#rs',el).onclick=()=>{P={o:[.5,.65],a:[.88,.65],b:[.3,.25]};store.set('prot',P)};
+ const geo=(w,h)=>{const o={x:P.o[0]*w,y:P.o[1]*h},a={x:P.a[0]*w,y:P.a[1]*h},b={x:P.b[0]*w,y:P.b[1]*h};const t1=Math.atan2(a.y-o.y,a.x-o.x),t2=Math.atan2(b.y-o.y,b.x-o.x);let d=deg(Math.abs(t2-t1));if(d>180)d=360-d;return{o,a,b,t1,t2,d}};
+ const ptr=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,r]};
+ cv.addEventListener('pointerdown',e=>{const[x,y,r]=ptr(e);let best=null,bd=1e9;['o','a','b'].forEach(k=>{const d=Math.hypot((P[k][0]-x)*r.width,(P[k][1]-y)*r.height);if(d<bd){bd=d;best=k}});if(bd<60){drag=best;cv.setPointerCapture(e.pointerId)}});
+ cv.addEventListener('pointermove',e=>{if(!drag)return;const[x,y]=ptr(e);P[drag]=[clamp(x,0,1),clamp(y,0,1)]});
+ const up=()=>{if(drag){drag=null;store.set('prot',P)}};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ const draw=(c,w,h,scale=1)=>{const G=geo(w,h);const{o,a,b,t1,t2}=G;const R=Math.min(w,h)*0.28;
+  c.save();c.translate(o.x,o.y);c.rotate(t1);c.strokeStyle='rgba(255,255,255,.55)';c.fillStyle='rgba(255,255,255,.85)';c.lineWidth=1*scale;c.font=(10*scale)+'px system-ui';c.textAlign='center';
+  c.beginPath();c.arc(0,0,R,0,-Math.PI,true);c.stroke();
+  for(let i=0;i<=180;i++){const L=i%10===0?12:i%5===0?8:4;const an=-rad(i);c.beginPath();c.moveTo(Math.cos(an)*R*scale/scale,Math.sin(an)*R);c.lineTo(Math.cos(an)*(R-L*scale),Math.sin(an)*(R-L*scale));c.stroke();if(i%30===0){c.fillText(String(i),Math.cos(an)*(R-24*scale),Math.sin(an)*(R-24*scale)+4)}}
+  c.restore();
+  let s=t1,e2=t2;let diff=e2-s;while(diff>Math.PI)diff-=2*Math.PI;while(diff<-Math.PI)diff+=2*Math.PI;
+  c.fillStyle='rgba(255,212,0,.25)';c.beginPath();c.moveTo(o.x,o.y);c.arc(o.x,o.y,R*0.45,s,s+diff,diff<0);c.closePath();c.fill();
+  c.strokeStyle='#ffd400';c.lineWidth=3*scale;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(o.x,o.y);c.lineTo(b.x,b.y);c.stroke();
+  [o,a,b].forEach((p,i)=>{c.fillStyle=i?'#ffd400':'#ff4d4d';c.strokeStyle='#000';c.lineWidth=1.5*scale;c.beginPath();c.arc(p.x,p.y,11*scale,0,7);c.fill();c.stroke()});
+  const mid=s+diff/2;const tx=o.x+Math.cos(mid)*R*0.7,ty=o.y+Math.sin(mid)*R*0.7;c.font=`700 ${20*scale}px system-ui`;c.textAlign='center';c.textBaseline='middle';const txt=G.d.toFixed(1)+'°';const tw=c.measureText(txt).width+16*scale;c.fillStyle='rgba(0,0,0,.7)';c.fillRect(tx-tw/2,ty-16*scale,tw,32*scale);c.fillStyle='#fff';c.fillText(txt,tx,ty);c.textBaseline='alphabetic';return G};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);if(!camOn){c.fillStyle='#1d2833';c.fillRect(0,0,w,h)}const G=draw(c,w,h);$('#ang',el).textContent=G.d.toFixed(1)+'°';$('#ang2',el).textContent=`Supplementary ${(180-G.d).toFixed(1)}° · Reflex ${(360-G.d).toFixed(1)}° · Slope ${G.d<90?fmt(Math.tan(rad(G.d))*100,1)+' %':'—'}`};
+ loop();
+ $('#snap',el).onclick=()=>{const r=cv.getBoundingClientRect();const W=video.videoWidth&&camOn?video.videoWidth:1280,H=video.videoHeight&&camOn?video.videoHeight:Math.round(1280*r.height/r.width);
+  const oc=document.createElement('canvas');const scale=Math.max(W/r.width,H/r.height);oc.width=Math.round(r.width*scale);oc.height=Math.round(r.height*scale);const c=oc.getContext('2d');
+  if(camOn&&video.videoWidth){const s2=Math.max(oc.width/video.videoWidth,oc.height/video.videoHeight);const dw=video.videoWidth*s2,dh=video.videoHeight*s2;c.drawImage(video,(oc.width-dw)/2,(oc.height-dh)/2,dw,dh)}else{c.fillStyle='#1d2833';c.fillRect(0,0,oc.width,oc.height)}
+  const G=draw(c,oc.width,oc.height,scale);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(0,oc.height-40*scale,oc.width,40*scale);c.fillStyle='#fff';c.font=`600 ${16*scale}px system-ui`;c.fillText('Angle '+G.d.toFixed(1)+'°  ·  '+new Date().toLocaleString()+'  ·  CivilKit',12*scale,oc.height-14*scale);
+  oc.toBlob(b=>download('angle-'+G.d.toFixed(1)+'deg.png',b),'image/png')};
+ return()=>{run=false;stopStream(stream)}}
+
+/* ================= TOOL: RULER ================= */
+function rulerTool(el){
+ const def=matchMedia('(pointer:coarse)').matches?6.3:3.78;let ppm=store.get('ppm',def);
+ el.innerHTML=`<canvas class="big" style="height:min(70vh,640px)"></canvas><div class="readout"><div class="huge" id="d" style="font-size:30px">—</div><div class="sub">Drag the two red lines to measure between them</div></div>
+ <details class="card" id="cal"><summary>Calibrate ruler (do this once)</summary><p class="hint">Place a bank/ATM card (85.6 mm long) on the screen against the top line. Move the slider until the blue bar's length exactly matches the card.</p><canvas id="cc" style="width:100%;height:70px;display:block"></canvas><input id="sl" type="range" min="2" max="12" step="0.01"><div class="row"><button class="btn" id="sv">Save calibration</button><span class="hint" id="pv"></span></div></details>`;
+ const cv=$('canvas',el);let A=store.get('rulA',[0.15,0.45]);let drag=null,run=true;
+ const sl=$('#sl',el);sl.value=ppm;sl.oninput=()=>{ppm=parseFloat(sl.value)};$('#sv',el).onclick=()=>{store.set('ppm',ppm);toast('Calibration saved')};
+ const ptrY=e=>{const r=cv.getBoundingClientRect();return(e.clientY-r.top)/r.height};
+ cv.addEventListener('pointerdown',e=>{const y=ptrY(e),r=cv.getBoundingClientRect();const d0=Math.abs(A[0]-y)*r.height,d1=Math.abs(A[1]-y)*r.height;drag=d0<d1?0:1;if(Math.min(d0,d1)>50)drag=null;else cv.setPointerCapture(e.pointerId)});
+ cv.addEventListener('pointermove',e=>{if(drag==null)return;A[drag]=clamp(ptrY(e),0,1)});cv.addEventListener('pointerup',()=>{drag=null;store.set('rulA',A)});
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const ink=css('--ink'),mut=css('--mut');c.strokeStyle=ink;c.fillStyle=ink;c.font='11px system-ui';
+  for(let mm=0;mm*ppm<h;mm++){const y=mm*ppm;const L=mm%10===0?26:mm%5===0?17:10;c.lineWidth=mm%10===0?1.5:1;c.beginPath();c.moveTo(0,y);c.lineTo(L,y);c.stroke();if(mm%10===0&&mm)c.fillText(mm/10+'',30,y+4)}
+  const ppi=ppm*25.4;for(let s=0;s*ppi/16<h;s++){const y=s*ppi/16;const L=s%16===0?26:s%8===0?19:s%4===0?13:7;c.beginPath();c.moveTo(w,y);c.lineTo(w-L,y);c.stroke();if(s%16===0&&s){c.textAlign='right';c.fillText(s/16+'"',w-30,y+4);c.textAlign='left'}}
+  c.fillStyle=mut;c.fillText('cm',30,14);c.textAlign='right';c.fillText('inch',w-30,14);c.textAlign='left';
+  const y0=A[0]*h,y1=A[1]*h;c.fillStyle='rgba(15,95,168,.12)';c.fillRect(0,Math.min(y0,y1),w,Math.abs(y1-y0));c.strokeStyle='#e53935';c.lineWidth=2;[y0,y1].forEach(y=>{c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();c.fillStyle='#e53935';c.beginPath();c.arc(w/2,y,9,0,7);c.fill()});
+  const mm=Math.abs(y1-y0)/ppm;$('#d',el).textContent=fmt(mm,1)+' mm · '+fmt(mm/25.4,2)+' in';
+  if($('#cal',el).open){const cc=$('#cc',el);const r2=fitCanvas(cc);r2.c.clearRect(0,0,r2.w,r2.h);r2.c.fillStyle=css('--pri');r2.c.fillRect(0,10,85.6*ppm,40);r2.c.fillStyle=mut;r2.c.font='12px system-ui';r2.c.fillText('85.6 mm',4,66);$('#pv',el).textContent=ppm.toFixed(2)+' px/mm'}};
+ loop();return()=>{run=false}}
+
+/* ================= TOOL: SOUND METER ================= */
+function soundTool(el){
+ let off=store.get('sndoff',94);
+ el.innerHTML=`<canvas class="big" style="height:200px"></canvas><div class="readout"><div class="huge" id="db">—</div><div class="sub" id="lv"></div></div>
+ <div class="kv"><div><small>Min</small><b id="mn">—</b></div><div><small>Max</small><b id="mx">—</b></div><div><small>Average (Leq)</small><b id="av">—</b></div><div><small>Calibration offset</small><b id="of">${off}</b></div></div>
+ <div class="row"><button class="btn big" id="go">Start measuring</button></div><div class="row"><button class="btn ghost" id="m1">Offset −1</button><button class="btn ghost" id="p1">Offset +1</button><button class="btn ghost" id="rs">Reset min/max</button></div>
+ <p class="hint">Approximate sound level in dB(A-unweighted) using the phone microphone, for site noise checks (machinery, generators, DG sets). Phone mics differ: compare once with a real sound meter and adjust the offset. Reference: 50 dB quiet office · 70 dB busy road · 85 dB hearing protection advised · 100+ dB breaker/drilling.</p>`;
+ const cv=$('canvas',el);let ctx=null,stream=null,an=null,run=true,hist=[],mn=Infinity,mx=-Infinity,eSum=0,eN=0,cur=null;
+ $('#m1',el).onclick=()=>{off--;store.set('sndoff',off);$('#of',el).textContent=off};$('#p1',el).onclick=()=>{off++;store.set('sndoff',off);$('#of',el).textContent=off};
+ $('#rs',el).onclick=()=>{mn=Infinity;mx=-Infinity;eSum=0;eN=0};
+ $('#go',el).onclick=async e=>{if(ctx){stopAll();e.target.textContent='Start measuring';return}try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});ctx=new (window.AudioContext||window.webkitAudioContext)();const src=ctx.createMediaStreamSource(stream);an=ctx.createAnalyser();an.fftSize=2048;src.connect(an);e.target.textContent='Stop';tick()}catch(err){toast('Microphone not available: '+err.message,3500)}};
+ const buf=new Float32Array(2048);
+ function tick(){if(!run||!an)return;requestAnimationFrame(tick);an.getFloatTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];const rms=Math.sqrt(s/buf.length);const db=20*Math.log10(Math.max(rms,1e-7))+off;cur=cur==null?db:cur+(db-cur)*0.15;
+  mn=Math.min(mn,cur);mx=Math.max(mx,cur);eSum+=Math.pow(10,cur/10);eN++;hist.push(cur);if(hist.length>300)hist.shift();
+  $('#db',el).textContent=cur.toFixed(0)+' dB';$('#mn',el).textContent=mn.toFixed(0);$('#mx',el).textContent=mx.toFixed(0);$('#av',el).textContent=(10*Math.log10(eSum/eN)).toFixed(0);
+  $('#lv',el).innerHTML=cur<55?'Quiet':cur<70?'Moderate':cur<85?'<span class="warn">Loud</span>':'<span class="bad">Very loud – use ear protection</span>';
+  const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);c.strokeStyle=css('--line');[40,60,80,100].forEach(v=>{const y=h-(v-20)/100*h;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();c.fillStyle=css('--mut');c.font='10px system-ui';c.fillText(v,4,y-2)});
+  c.strokeStyle=css('--pri');c.lineWidth=2;c.beginPath();hist.forEach((v,i)=>{const x=i/300*w,y=h-(v-20)/100*h;i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
+ function stopAll(){stopStream(stream);stream=null;if(ctx)ctx.close().catch(()=>{});ctx=null;an=null}
+ return()=>{run=false;stopAll()}}
+
+/* ================= TOOL: GPS AREA ================= */
+const AREA_U=[['m2','m²',1],['ft2','sq ft',0.09290304],['yd2','sq yd (gaj)',0.83612736],['acre','acre',4046.8564224],['ha','hectare',10000],['gunta','gunta/guntha',101.17141056],['cent','cent',40.468564224],['ground','ground (2400 sq ft)',222.967296],['km2','km²',1e6]];
+function gpsTool(el){
+ el.innerHTML=`<div class="card"><div class="kv"><div><small>Latitude, Longitude</small><b id="ll" style="font-size:14px">waiting for GPS…</b></div><div><small>GPS accuracy</small><b id="ac">—</b></div></div>
+ <div class="row"><button class="btn" id="add">＋ Add corner here</button><button class="btn ghost" id="un">Undo</button><button class="btn ghost" id="cl">Clear</button></div></div>
+ <canvas class="big" style="height:260px"></canvas>
+ <div class="card"><h3>Plot / land area</h3><div class="res" id="res"></div><div class="row"><button class="btn" id="sh">Share / Copy</button><button class="btn ghost" id="csv">Export CSV</button></div>
+ <p class="hint">Walk to each corner of the plot/field and tap "Add corner" (wait until accuracy is under ~5 m; stand still a few seconds at each corner). Phone GPS is typically ±3–5 m, so this is good for land survey estimates of medium/large plots, not for exact small-plot boundaries.</p></div>`;
+ const cv=$('canvas',el);let pos=null,pts=store.get('gpspts',[]),run=true;
+ let wid=null;if('geolocation' in navigator){wid=navigator.geolocation.watchPosition(p=>{pos=p.coords;$('#ll',el).textContent=pos.latitude.toFixed(6)+', '+pos.longitude.toFixed(6);$('#ac',el).innerHTML=`<span class="${pos.accuracy<=5?'good':pos.accuracy<=12?'warn':'bad'}">±${pos.accuracy.toFixed(1)} m</span>`},e=>{$('#ll',el).textContent='GPS error: '+e.message},{enableHighAccuracy:true,maximumAge:0,timeout:20000})}else $('#ll',el).textContent='GPS not available';
+ $('#add',el).onclick=()=>{if(!pos){toast('Waiting for GPS fix');return}pts.push([pos.latitude,pos.longitude,pos.accuracy]);store.set('gpspts',pts);if(navigator.vibrate)navigator.vibrate(30);calc()};
+ $('#un',el).onclick=()=>{pts.pop();store.set('gpspts',pts);calc()};$('#cl',el).onclick=()=>{if(confirmClear()){pts=[];store.set('gpspts',pts);calc()}};
+ function confirmClear(){return pts.length<3||window.confirm('Clear all corners?')}
+ let txt='';
+ function xy(){if(!pts.length)return[];const R=6371008.8,la0=rad(pts[0][0]),lo0=pts[0][1];return pts.map(p=>[(p[1]-lo0)*Math.PI/180*R*Math.cos(la0),(p[0]-pts[0][0])*Math.PI/180*R])}
+ function calc(){const P=xy();let A=0,per=0;for(let i=0;i<P.length;i++){const j=(i+1)%P.length;A+=P[i][0]*P[j][1]-P[j][0]*P[i][1];if(P.length>1&&(j||P.length>2))per+=Math.hypot(P[j][0]-P[i][0],P[j][1]-P[i][1])}A=Math.abs(A)/2;if(P.length<3)A=NaN;
+  const rows=[['Corners',pts.length],['Perimeter',ok(per)&&pts.length>1?fmt(per,1)+' m · '+fmt(per/0.3048,1)+' ft':'—']].concat(AREA_U.map(u=>['Area ('+u[1]+')',fmt(A/u[2],u[2]>1000?4:2)]));
+  $('#res',el).innerHTML=rows.map(r=>`<div class="r"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+  txt='GPS plot area\n'+rows.map(r=>r[0]+': '+r[1]).join('\n')+'\nCorners:\n'+pts.map((p,i)=>(i+1)+'. '+p[0].toFixed(6)+', '+p[1].toFixed(6)+' (±'+p[2].toFixed(1)+' m)').join('\n')}
+ $('#sh',el).onclick=()=>shareText('Plot area',txt);
+ $('#csv',el).onclick=()=>download('plot-corners.csv',new Blob(['corner,latitude,longitude,accuracy_m\n'+pts.map((p,i)=>`${i+1},${p[0]},${p[1]},${p[2]}`).join('\n')],{type:'text/csv'}));
+ calc();
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const P=xy();if(!P.length){c.fillStyle=css('--mut');c.font='14px system-ui';c.textAlign='center';c.fillText('Corners will be drawn here',w/2,h/2);return}
+  let mnx=Infinity,mny=Infinity,mxx=-Infinity,mxy=-Infinity;P.forEach(p=>{mnx=Math.min(mnx,p[0]);mny=Math.min(mny,p[1]);mxx=Math.max(mxx,p[0]);mxy=Math.max(mxy,p[1])});const s=Math.min((w-40)/Math.max(mxx-mnx,1),(h-40)/Math.max(mxy-mny,1));const tx=x=>w/2+(x-(mnx+mxx)/2)*s,ty=y=>h/2-(y-(mny+mxy)/2)*s;
+  c.fillStyle='rgba(15,95,168,.15)';c.strokeStyle=css('--pri');c.lineWidth=2;c.beginPath();P.forEach((p,i)=>i?c.lineTo(tx(p[0]),ty(p[1])):c.moveTo(tx(p[0]),ty(p[1])));if(P.length>2)c.closePath();c.fill();c.stroke();
+  c.font='11px system-ui';P.forEach((p,i)=>{c.fillStyle=css('--pri');c.beginPath();c.arc(tx(p[0]),ty(p[1]),5,0,7);c.fill();c.fillStyle=css('--ink');c.fillText(String(i+1),tx(p[0])+7,ty(p[1])-7);const j=(i+1)%P.length;if(P.length>1&&(j||P.length>2)){const d=Math.hypot(P[j][0]-p[0],P[j][1]-p[1]);c.fillStyle=css('--mut');c.fillText(d.toFixed(1)+' m',(tx(p[0])+tx(P[j][0]))/2+4,(ty(p[1])+ty(P[j][1]))/2)}})};
+ loop();return()=>{run=false;if(wid!=null)navigator.geolocation.clearWatch(wid)}}
+
+/* ================= TOOL: TORCH ================= */
+function torchTool(el){
+ el.innerHTML=`<div class="card" style="text-align:center"><div class="huge" id="st" style="font-size:80px">🔦</div><button class="btn big" id="tg">Turn ON</button><p class="hint" id="msg">Uses the phone's camera flash LED. Handy for inspecting shafts, ducts, false ceilings and basements. Works in Chrome on Android.</p></div>`;
+ let stream=null,track=null,on=false;
+ $('#tg',el).onclick=async e=>{try{if(!track){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});track=stream.getVideoTracks()[0];const cap=track.getCapabilities?track.getCapabilities():{};if(!cap.torch){$('#msg',el).innerHTML='<span class="warn">This browser/device does not allow controlling the flash from a web app.</span>';stopStream(stream);track=null;return}}on=!on;await track.applyConstraints({advanced:[{torch:on}]});e.target.textContent=on?'Turn OFF':'Turn ON';$('#st',el).style.opacity=on?1:.4}catch(err){toast('Torch error: '+err.message,3000)}};
+ return()=>stopStream(stream)}
+
+/* ================= ORIENTATION HELPERS ================= */
+function orientGate(box,startFn,msg){let stop=null,timer=null,g=null;
+ const needs=typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function';
+ const deny=()=>{box.innerHTML='<p class="bad">Sensor permission denied.</p>'};
+ const run=async()=>{if(needs){try{if(await DeviceOrientationEvent.requestPermission()!=='granted')return deny()}catch(e){return deny()}}box.innerHTML='';const r=startFn();stop=r.stop;g=r.got;timer=setTimeout(()=>{if(g&&!g())box.innerHTML='<p class="warn">'+(msg||'No rotation sensor found. Use this tool on a phone.')+'</p>'},3000)};
+ const showBtn=()=>{box.innerHTML='<button class="btn big">Start sensors</button>';box.firstChild.onclick=run};
+ if(needs){Promise.resolve().then(()=>DeviceOrientationEvent.requestPermission()).then(r=>{if(r==='granted')run();else showBtn()}).catch(showBtn)}else run();
+ return()=>{clearTimeout(timer);stop&&stop()}}
+/* magnetic heading of phone top (0..360, clockwise from magnetic north) */
+function magHeading(cb){let got=false,hd=null;const ev='ondeviceorientationabsolute' in window?'deviceorientationabsolute':'deviceorientation';
+ const h=e=>{let x=null;if(e.webkitCompassHeading!=null)x=e.webkitCompassHeading;else if((e.absolute||ev==='deviceorientationabsolute')&&e.alpha!=null)x=360-e.alpha;if(x==null)return;got=true;x=(x+screenAngle()+360)%360;
+  if(hd==null)hd=x;else{const d=((x-hd+540)%360)-180;hd=(hd+d*0.2+360)%360}cb(hd,e)};
+ window.addEventListener(ev,h);return{stop:()=>window.removeEventListener(ev,h),got:()=>got}}
+/* gyro (relative) yaw – not affected by steel/magnets. Calls cb(alpha, beta, gamma) */
+function gyroYaw(cb){let got=false,a=null;const h=e=>{if(e.alpha==null)return;got=true;if(a==null)a=e.alpha;else{const d=((e.alpha-a+540)%360)-180;a=(a+d*0.35+360)%360}cb(a,e.beta||0,e.gamma||0)};
+ window.addEventListener('deviceorientation',h);return{stop:()=>window.removeEventListener('deviceorientation',h),got:()=>got}}
+const wrap180=x=>((x%360)+540)%360-180;
+/* Sun position (NOAA-style approximation, ~0.1° accuracy). Returns azimuth (clockwise from TRUE north) & altitude in degrees */
+function sunPos(date,lat,lon){const n=date.getTime()/86400000+2440587.5-2451545.0;
+ const L=(280.460+0.9856474*n)%360,g=rad((357.528+0.9856003*n)%360);const lam=rad(L+1.915*Math.sin(g)+0.020*Math.sin(2*g));const eps=rad(23.439-0.0000004*n);
+ const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam)),dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+ const gmst=((18.697374558+24.06570982441908*n)%24+24)%24;const H=rad(gmst*15+lon)-ra,phi=rad(lat);
+ const alt=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+ const az=Math.atan2(-Math.cos(dec)*Math.sin(H),Math.sin(dec)*Math.cos(phi)-Math.cos(dec)*Math.cos(H)*Math.sin(phi));
+ return{az:(deg(az)+360)%360,alt:deg(alt)}}
+function drawArrow(c,x,y,len,ang,color,label,width=6){c.save();c.translate(x,y);c.rotate(rad(ang));c.strokeStyle=color;c.fillStyle=color;c.lineWidth=width;c.lineCap='round';
+ c.beginPath();c.moveTo(0,0);c.lineTo(0,-len+14);c.stroke();c.beginPath();c.moveTo(0,-len-4);c.lineTo(-12,-len+18);c.lineTo(12,-len+18);c.closePath();c.fill();
+ if(label){c.translate(0,-len-22);c.rotate(-rad(ang));c.font='700 18px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(label,0,0)}c.restore()}
+
+/* ================= TOOL: NORTH FINDER ================= */
+function northTool(el){
+ el.innerHTML=`<div class="seg"><button data-m="mag" class="on">Compass method</button><button data-m="sun">Sun &amp; shadow (true north)</button></div><div id="pane"></div>`;
+ let stopPane=null;
+ const show=m=>{if(stopPane){stopPane();stopPane=null}el.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));store.set('northm',m);stopPane=(m==='mag'?northMag:northSun)($('#pane',el))};
+ el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>show(b.dataset.m));show(store.get('northm','mag'));
+ return()=>{if(stopPane)stopPane()}}
+function northMag(el){
+ const dec=store.get('decl',0);
+ el.innerHTML=`<canvas class="big"></canvas><div class="readout"><div class="huge" id="st" style="font-size:28px">—</div><div class="sub" id="sb"></div></div>
+ <div class="card"><div class="form"><label class="fld"><span>Magnetic declination <em>° (+E / −W)</em></span><input id="dc" type="number" step="0.1" inputmode="decimal" value="${dec}"></label></div>
+ <p class="hint">Lay the phone flat and rotate it until the red <b>N</b> arrow points to the top of the phone. Then the phone's top edge points to North: mark a line along the phone's long edge. Declination is the gap between magnetic and true north; in most of India it is small (about −1° to +1°). Find yours on the NOAA magnetic field calculator and enter it here.<br><b class="warn">Keep 1 m away from steel bars, columns, vehicles and electrical panels; they make the compass wrong. On an RCC site, use the Sun &amp; shadow method.</b></p></div><div id="gate"></div>`;
+ const cv=$('canvas',el);let hd=null,run=true,tilt=0,inLock=false;
+ $('#dc',el).oninput=e=>store.set('decl',parseFloat(e.target.value)||0);
+ const stopS=orientGate($('#gate',el),()=>magHeading((h,e)=>{hd=h;tilt=Math.max(Math.abs(e.beta||0),Math.abs(e.gamma||0))}),'No compass (magnetometer) data on this device.');
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const cx=w/2,cy=h/2,R=Math.min(w,h)/2-30,mut=css('--mut'),ink=css('--ink');
+  c.strokeStyle=css('--line');c.lineWidth=2;c.beginPath();c.arc(cx,cy,R,0,7);c.stroke();
+  c.fillStyle=mut;c.font='600 12px system-ui';c.textAlign='center';c.fillText('▲ PHONE TOP',cx,18);
+  if(hd==null){c.fillText('Waiting for compass…',cx,cy);return}
+  const D=parseFloat($('#dc',el).value)||0;const th=(hd+D+360)%360;
+  [['E',90],['S',180],['W',270]].forEach(([l,a])=>{const an=rad(a-th);c.fillStyle=mut;c.font='700 16px system-ui';c.fillText(l,cx+Math.sin(an)*(R-18),cy-Math.cos(an)*(R-18)+6)});
+  const okN=Math.abs(wrap180(th))<=1.5;drawArrow(c,cx,cy,R-8,-th,okN?css('--ok'):'#e53935','N',8);
+  c.fillStyle=ink;c.beginPath();c.arc(cx,cy,7,0,7);c.fill();
+  const t=wrap180(th);$('#st',el).innerHTML=okN?'<span class="good">✓ Phone top = NORTH</span>':(t>0?'Turn LEFT ⟲ ':'Turn RIGHT ⟳ ')+Math.abs(t).toFixed(0)+'°';
+  $('#sb',el).innerHTML=`Magnetic ${hd.toFixed(1)}° · True ${th.toFixed(1)}°${tilt>15?' · <span class="warn">keep phone flat</span>':''}`;
+  if(okN&&!inLock&&navigator.vibrate)navigator.vibrate(30);inLock=okN};
+ loop();return()=>{run=false;stopS()}}
+function northSun(el){
+ const loc=store.get('loc',{lat:'',lon:''});
+ el.innerHTML=`<div class="card"><h3>1 · Your location &amp; time</h3><div class="form"><label class="fld"><span>Latitude</span><input id="la" type="number" step="any" inputmode="decimal" value="${loc.lat}"></label><label class="fld"><span>Longitude</span><input id="lo" type="number" step="any" inputmode="decimal" value="${loc.lon}"></label></div>
+ <div class="row"><button class="btn ghost" id="gp">📍 Use GPS</button><span class="hint" id="tm"></span></div></div>
+ <div class="card"><h3>2 · Read the shadow</h3><canvas class="big" style="height:min(48vh,380px)"></canvas><div class="kv" style="margin-top:10px"><div><small>Sun direction</small><b id="sa">—</b></div><div><small>Sun height</small><b id="sh">—</b></div><div><small>Shadow points to</small><b id="sd">—</b></div><div><small>North from shadow line</small><b id="nf">—</b></div></div><p class="note" id="sw"></p>
+ <ol class="hint"><li>Stand a straight rod vertically on level ground in the sun. Use a plumb bob or the Level tool to make it truly vertical.</li><li>Mark the rod base (O) and the tip of its shadow (T). Line O→T is the shadow line; it is the yellow arrow at the top of the drawing.</li><li>North is at the angle shown, turned from O→T. Set it out with a protractor or tape, or use the phone guide below.</li></ol></div>
+ <div class="card"><h3>3 · Phone guide (optional)</h3><p class="hint">Lay the phone flat with its top edge pointing along the shadow (O→T) and tap <b>Lock on shadow</b>. Keeping it flat on the ground, rotate it until it shows <b>NORTH</b>, then mark along the phone's edge. This uses the gyroscope, so steel nearby does not affect it.</p>
+ <div class="readout"><div class="huge" id="gs" style="font-size:28px">—</div><div class="sub" id="gb"></div></div><div class="row"><button class="btn" id="lk">Lock on shadow</button><button class="btn ghost" id="ul">Unlock</button></div><div id="gate"></div></div>`;
+ const cv=$('canvas',el);let run=true,lockA=null,alpha=null,tilt=0,S=null,wasOk=false;
+ const la=$('#la',el),lo=$('#lo',el);const save=()=>store.set('loc',{lat:la.value,lon:lo.value});la.oninput=save;lo.oninput=save;
+ const gps=()=>{if(!navigator.geolocation){toast('GPS not available');return}$('#gp',el).textContent='Locating…';navigator.geolocation.getCurrentPosition(p=>{la.value=p.coords.latitude.toFixed(5);lo.value=p.coords.longitude.toFixed(5);save();$('#gp',el).textContent='📍 Use GPS'},e=>{toast('GPS: '+e.message);$('#gp',el).textContent='📍 Use GPS'},{enableHighAccuracy:true,timeout:20000})};
+ $('#gp',el).onclick=gps;if(la.value===''||lo.value==='')gps();
+ const stopS=orientGate($('#gate',el),()=>gyroYaw((a,b,g)=>{alpha=a;tilt=Math.max(Math.abs(b),Math.abs(g))}),'No gyroscope found; set out north from the drawing with a protractor/tape instead.');
+ $('#lk',el).onclick=()=>{if(alpha==null){toast('Sensor not ready');return}if(S==null){toast('Enter location first');return}lockA=alpha;toast('Locked on shadow line')};
+ $('#ul',el).onclick=()=>{lockA=null};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const now=new Date();$('#tm',el).textContent=now.toLocaleTimeString();
+  const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const cx=w/2,cy=h/2+10,R=Math.min(w,h)/2-40,mut=css('--mut'),ink=css('--ink');
+  const lat=parseFloat(la.value),lon=parseFloat(lo.value);if(!ok(lat)||!ok(lon)){S=null;c.fillStyle=mut;c.font='14px system-ui';c.textAlign='center';c.fillText('Enter or fetch your location',cx,cy);return}
+  const sp=sunPos(now,lat,lon);S=(sp.az+180)%360;
+  $('#sa',el).textContent=sp.az.toFixed(1)+'°';$('#sh',el).textContent=sp.alt.toFixed(1)+'°';$('#sd',el).textContent=S.toFixed(1)+'°';
+  const cw=(360-S)%360;$('#nf',el).innerHTML=(cw<=180?cw.toFixed(1)+'° clockwise ⟳':(360-cw).toFixed(1)+'° anticlockwise ⟲');
+  $('#sw',el).innerHTML=sp.alt<3?'<span class="bad">Sun is below/near the horizon now; use this method in daylight.</span>':sp.alt>80?'<span class="warn">Sun is almost overhead, so the shadow is very short. Try 1–2 hours before or after noon.</span>':'Shadow moves about 15° per hour, so mark the shadow and read the angle at the same time.';
+  c.strokeStyle=css('--line');c.lineWidth=1.5;c.beginPath();c.arc(cx,cy,R,0,7);c.stroke();
+  drawArrow(c,cx,cy,R*0.8,0,'#e0a800','T',7);c.fillStyle=mut;c.font='12px system-ui';c.textAlign='left';c.fillText('shadow line O→T',cx+10,cy-R*0.45);
+  c.fillStyle=ink;c.beginPath();c.arc(cx,cy,8,0,7);c.fill();c.textAlign='left';c.font='600 13px system-ui';c.fillText('O (rod)',cx+12,cy+22);
+  const nA=-S;c.fillStyle='rgba(229,57,53,.15)';c.beginPath();c.moveTo(cx,cy);const a0=-Math.PI/2,sweep=rad(wrap180(nA));c.arc(cx,cy,R*0.35,a0,a0+sweep,sweep<0);c.closePath();c.fill();
+  drawArrow(c,cx,cy,R,nA,'#e53935','N',7);
+  [['E',90],['S',180],['W',270]].forEach(([l,a])=>{const an=rad(a-S);c.fillStyle=mut;c.font='700 14px system-ui';c.textAlign='center';c.fillText(l,cx+Math.sin(an)*(R+18),cy-Math.cos(an)*(R+18)+5)});
+  if(lockA!=null&&alpha!=null){const turned=(lockA-alpha+360)%360;const bear=(S+turned)%360;const off=wrap180(bear);const good=Math.abs(off)<=0.5;
+   $('#gs',el).innerHTML=good?'<span class="good">✓ Phone top = TRUE NORTH</span>':(off>0?'Turn LEFT ⟲ ':'Turn RIGHT ⟳ ')+Math.abs(off).toFixed(1)+'°';
+   $('#gb',el).innerHTML='Phone points '+bear.toFixed(1)+'°'+(tilt>12?' · <span class="warn">keep phone flat on the ground</span>':'');if(good&&!wasOk&&navigator.vibrate)navigator.vibrate(40);wasOk=good}
+  else{$('#gs',el).textContent='Not locked';$('#gb',el).textContent=''}};
+ loop();return()=>{run=false;stopS()}}
+
+/* ================= TOOL: WALL 90° MARKING ================= */
+function rightAngleTool(el){
+ el.innerHTML=`<div class="seg"><button data-m="tape" class="on">Tape method (3-4-5)</button><button data-m="phone">Phone guide</button></div><div id="pane"></div>`;
+ let stopPane=null;
+ const show=m=>{if(stopPane){stopPane();stopPane=null}el.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));store.set('ram',m);stopPane=(m==='tape'?raTape:raPhone)($('#pane',el))||null};
+ el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>show(b.dataset.m));show(store.get('ram','tape'));
+ return()=>{if(stopPane)stopPane()}}
+function raTape(el){
+ const s=store.get('ratape',{u:'ft',a:6,b:8,t:90});
+ el.innerHTML=`<div class="card"><div class="form"><label class="fld"><span>Unit</span><select id="u"><option value="ft">Feet</option><option value="m">Metre</option></select></label>
+ <label class="fld"><span>Mark on wall 1 (OA) <em></em></span><input id="a" type="number" step="any" inputmode="decimal"></label><label class="fld"><span>Mark on wall 2 (OB) <em></em></span><input id="b" type="number" step="any" inputmode="decimal"></label><label class="fld"><span>Angle between walls <em>°</em></span><input id="t" type="number" step="any" inputmode="decimal"></label></div></div>
+ <canvas class="big" style="height:min(50vh,380px)"></canvas>
+ <div class="card"><h3>Result</h3><div class="res" id="r"></div><div class="row"><button class="btn" id="sh">Share / Copy</button></div></div>
+ <div class="card"><h3>How to mark two walls at 90°</h3><ol class="hint"><li>Stretch a string along the line of wall 1. Fix the corner point <b>O</b> with a nail.</li><li>From O, measure <b>OA</b> along the string and mark point <b>A</b>.</li><li>Hold tape 1 at O with length <b>OB</b>, and tape 2 at A with length <b>AB</b> (the diagonal). Where the two tape ends meet is point <b>B</b>.</li><li>Stretch a string from O through B: this is wall 2, at exactly the set angle to wall 1.</li><li>Use bigger numbers (e.g. 9-12-15 or 12-16-20 ft) for long walls; it is more accurate. For a rectangular room, both diagonals must be equal.</li></ol></div>
+ <div class="card"><h3>Ready 3-4-5 sets</h3><div id="sets"></div></div>`;
+ const cv=$('canvas',el),u=$('#u',el),A=$('#a',el),B=$('#b',el),T=$('#t',el),r=$('#r',el);u.value=s.u;A.value=s.a;B.value=s.b;T.value=s.t;let txt='';
+ const fi=x=>{let tin=x*12,ft=Math.floor(tin/12),inch=tin-ft*12;if(inch>11.94){ft++;inch=0}return ft+'′ '+inch.toFixed(1)+'″'};
+ const show=(x,un)=>un==='ft'?fmt(x,3)+' ft ('+fi(x)+')':fmt(x,3)+' m ('+fmt(x*1000,0)+' mm)';
+ const sets=()=>{const L=u.value==='ft'?[[3,4,5],[6,8,10],[9,12,15],[12,16,20],[15,20,25]]:[[0.6,0.8,1.0],[0.9,1.2,1.5],[1.2,1.6,2.0],[3,4,5],[6,8,10]];$('#sets',el).innerHTML=`<table><thead><tr><th>OA</th><th>OB</th><th>Diagonal AB</th></tr></thead><tbody>${L.map(x=>`<tr><td>${x[0]} ${u.value}</td><td>${x[1]} ${u.value}</td><td><b>${x[2]} ${u.value}</b></td></tr>`).join('')}</tbody></table>`};
+ const upd=()=>{const a=parseFloat(A.value),b=parseFloat(B.value),t=parseFloat(T.value),un=u.value;store.set('ratape',{u:un,a,b,t});el.querySelectorAll('.fld em').forEach((e,i)=>{if(i<2)e.textContent=un});
+  const c2=Math.sqrt(a*a+b*b-2*a*b*Math.cos(rad(t)));const rows=[['Wall 1 mark OA',show(a,un)],['Wall 2 mark OB',show(b,un)],['Diagonal AB (tape)',`<span class="good">${show(c2,un)}</span>`],['Error if diagonal is 1 cm / ¼″ off',`≈ ${fmt(deg((un==='ft'?0.0208:0.01)*c2/(a*b*Math.sin(rad(t)))),2)}°`]];
+  r.innerHTML=rows.map(x=>`<div class="r"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');txt=`Wall marking at ${t}°\nOA = ${show(a,un)}\nOB = ${show(b,un)}\nDiagonal AB = ${show(c2,un)}\n(CivilKit)`;sets();draw(a,b,t,c2,un)};
+ const draw=(a,b,t,c2,un)=>{const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);if(!(a>0&&b>0&&t>0&&t<180))return;const ink=css('--ink'),pri=css('--pri'),mut=css('--mut');
+  const pts=[[0,0],[a,0],[b*Math.cos(rad(t)),b*Math.sin(rad(t))]];const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const mnx=Math.min(...xs),mxx=Math.max(...xs),mxy=Math.max(...ys);const sc=Math.min((w-110)/(mxx-mnx||1),(h-90)/(mxy||1));
+  const X=p=>55+(p[0]-mnx)*sc,Y=p=>h-40-p[1]*sc;const[O,Pa,Pb]=pts;
+  c.strokeStyle=mut;c.lineWidth=10;c.globalAlpha=.25;c.beginPath();c.moveTo(X(O)-30,Y(O));c.lineTo(w-10,Y(O));c.moveTo(X(O),Y(O)+20);c.lineTo(X(O)+(X(Pb)-X(O))*1.25,Y(O)+(Y(Pb)-Y(O))*1.25);c.stroke();c.globalAlpha=1;
+  c.lineWidth=3;c.strokeStyle=pri;c.beginPath();c.moveTo(X(Pa),Y(Pa));c.lineTo(X(O),Y(O));c.lineTo(X(Pb),Y(Pb));c.stroke();
+  c.setLineDash([8,6]);c.strokeStyle='#e53935';c.beginPath();c.moveTo(X(Pa),Y(Pa));c.lineTo(X(Pb),Y(Pb));c.stroke();c.setLineDash([]);
+  if(Math.abs(t-90)<0.01){c.strokeStyle=ink;c.lineWidth=1.5;c.strokeRect(X(O),Y(O)-16,16,16)}else{c.strokeStyle=ink;c.lineWidth=1.5;c.beginPath();c.arc(X(O),Y(O),24,0,-rad(t),true);c.stroke()}
+  c.font='700 14px system-ui';c.fillStyle=ink;c.textAlign='center';[[O,'O',-12,18],[Pa,'A',0,22],[Pb,'B',-14,-6]].forEach(([p,l,dx,dy])=>{c.beginPath();c.arc(X(p),Y(p),6,0,7);c.fill();c.fillText(l,X(p)+dx,Y(p)+dy)});
+  c.font='600 13px system-ui';c.fillStyle=pri;c.fillText(fmt(a,2)+' '+un,(X(O)+X(Pa))/2,Y(O)+22);c.save();c.translate((X(O)+X(Pb))/2-14,(Y(O)+Y(Pb))/2);c.fillText(fmt(b,2)+' '+un,0,0);c.restore();
+  c.fillStyle='#e53935';c.fillText(fmt(c2,3)+' '+un,(X(Pa)+X(Pb))/2+30,(Y(Pa)+Y(Pb))/2);c.fillStyle=ink;c.fillText(fmt(t,1)+'°',X(O)+36,Y(O)-22);
+  c.fillStyle=mut;c.font='12px system-ui';c.textAlign='left';c.fillText('wall 1',w-60,Y(O)-10)};
+ [u,A,B,T].forEach(x=>x.addEventListener('input',upd));u.onchange=upd;$('#sh',el).onclick=()=>shareText('Wall marking',txt);
+ window.addEventListener('resize',upd);upd();return()=>window.removeEventListener('resize',upd)}
+function raPhone(el){
+ el.innerHTML=`<canvas class="big" style="height:min(48vh,380px)"></canvas><div class="readout"><div class="huge" id="an">—</div><div class="sub" id="st"></div></div>
+ <div class="card"><div class="form"><label class="fld"><span>Target angle <em>°</em></span><select id="tg"><option>90</option><option>45</option><option>60</option><option>120</option><option>135</option><option>30</option></select></label></div>
+ <div class="row"><button class="btn" id="lk">Lock wall 1</button><button class="btn ghost" id="ul">Reset</button></div>
+ <ol class="hint"><li>Lay the phone flat on the floor with its <b>long edge exactly along wall 1</b> (string line or wall face). Tap <b>Lock wall 1</b>.</li><li>Keeping one corner at the same point, rotate the phone flat on the floor until it shows the target angle in green.</li><li>Mark a line along the phone's long edge: this is wall 2. Extend it with a string.</li></ol>
+ <p class="hint warn">Phone gyroscopes are accurate to about ±0.5–1°, which is fine for layout lines and furniture. For foundations and brickwork, always confirm with the Tape method (3-4-5): it is exact.</p></div><div id="gate"></div>`;
+ const cv=$('canvas',el);let alpha=null,lockA=null,tilt=0,run=true,was=false;
+ const stopS=orientGate($('#gate',el),()=>gyroYaw((a,b,g)=>{alpha=a;tilt=Math.max(Math.abs(b),Math.abs(g))}));
+ $('#lk',el).onclick=()=>{if(alpha==null){toast('Sensor not ready');return}lockA=alpha;if(navigator.vibrate)navigator.vibrate(30)};$('#ul',el).onclick=()=>{lockA=null};
+ const loop=()=>{if(!run)return;requestAnimationFrame(loop);const{c,w,h}=fitCanvas(cv);c.clearRect(0,0,w,h);const cx=w/2,cy=h*0.62,R=Math.min(w,h*1.2)/2-30,mut=css('--mut'),pri=css('--pri'),ink=css('--ink');
+  const tg=parseFloat($('#tg',el).value);
+  if(lockA==null||alpha==null){c.fillStyle=mut;c.font='14px system-ui';c.textAlign='center';c.fillText(alpha==null?'Waiting for sensor…':'Place phone along wall 1 and tap “Lock wall 1”',cx,cy);$('#an',el).textContent='—';$('#st',el).textContent='';return}
+  const turned=wrap180(lockA-alpha);const ang=Math.abs(turned),good=Math.abs(ang-tg)<=0.3;
+  c.strokeStyle=mut;c.lineWidth=12;c.globalAlpha=.3;c.beginPath();c.moveTo(cx-R,cy);c.lineTo(cx+R,cy);c.stroke();c.globalAlpha=1;c.fillStyle=mut;c.font='12px system-ui';c.textAlign='left';c.fillText('wall 1 (locked)',cx+R-90,cy+24);
+  const dir=turned>=0?1:-1;const tgA=-dir*tg;c.setLineDash([6,6]);c.strokeStyle=css('--ok');c.lineWidth=2;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(rad(tgA))*R,cy+Math.sin(rad(tgA))*R);c.stroke();c.setLineDash([]);
+  const cur=-turned;c.strokeStyle=good?css('--ok'):pri;c.lineWidth=6;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(rad(cur))*R,cy+Math.sin(rad(cur))*R);c.stroke();
+  c.fillStyle='rgba(15,95,168,.15)';c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,R*0.3,0,rad(cur),cur<0);c.closePath();c.fill();c.fillStyle=ink;c.beginPath();c.arc(cx,cy,7,0,7);c.fill();
+  $('#an',el).innerHTML=`<span class="${good?'good':''}">${ang.toFixed(1)}°</span>`;
+  $('#st',el).innerHTML=(good?'<b class="good">✓ Mark wall 2 now</b>':(ang<tg?'Rotate further: ':'Rotate back: ')+Math.abs(tg-ang).toFixed(1)+'°')+(tilt>12?' · <span class="warn">keep phone flat on floor</span>':'');
+  if(good&&!was&&navigator.vibrate)navigator.vibrate([30,40,30]);was=good};
+ loop();return()=>{run=false;stopS()}}
+
+/* ================= TOOL: UNIT CONVERTER ================= */
+const UNITS={
+ 'Length':[['mm',.001],['cm',.01],['m',1],['km',1000],['inch',.0254],['feet',.3048],['yard',.9144],['mile',1609.344]],
+ 'Area':AREA_U.map(u=>[u[1],u[2]]),
+ 'Volume':[['m³',1],['litre',.001],['cft (ft³)',.028316846592],['cubic yard',.764554857984],['brass (100 cft)',2.8316846592],['gallon (US)',.003785411784],['gallon (UK)',.00454609],['ml',1e-6]],
+ 'Weight':[['g',.001],['kg',1],['quintal',100],['tonne',1000],['lb',.45359237],['short ton',907.18474],['cement bag (50 kg)',50]],
+ 'Pressure / Stress':[['Pa (N/m²)',1],['kPa (kN/m²)',1e3],['MPa (N/mm²)',1e6],['kg/cm²',98066.5],['t/m²',9806.65],['bar',1e5],['psi',6894.757293],['ksi',6894757.293]],
+ 'Force':[['N',1],['kN',1000],['kgf',9.80665],['tonne-force',9806.65],['lbf',4.448221615],['kip',4448.221615]],
+ 'Angle':[['degree',1],['radian',57.29577951],['gradian',.9],['minute (′)',1/60]],
+ 'Density':[['kg/m³',1],['g/cm³',1000],['kN/m³',101.9716213],['lb/ft³',16.01846337]]};
+function unitTool(el){
+ const s=store.get('unit',{c:'Length',f:2,v:1});
+ el.innerHTML=`<div class="card"><div class="form"><label class="fld"><span>Category</span><select id="c">${Object.keys(UNITS).map(k=>`<option>${k}</option>`).join('')}</select></label><label class="fld"><span>Value</span><input id="v" type="number" step="any" inputmode="decimal"></label><label class="fld"><span>From unit</span><select id="f"></select></label></div></div><div class="card"><div class="res" id="r"></div><p class="hint">Area: 1 gunta = 1089 sq ft, 1 cent = 435.6 sq ft, 1 acre = 40 gunta = 100 cent. Bigha/biswa differ state-to-state, so they are not included. 1 brass = 100 cft (sand/aggregate trade unit).</p></div>`;
+ const c=$('#c',el),v=$('#v',el),f=$('#f',el),r=$('#r',el);c.value=s.c;v.value=s.v;
+ const fill=()=>{f.innerHTML=UNITS[c.value].map((u,i)=>`<option value="${i}">${u[0]}</option>`).join('')};fill();f.value=s.f<UNITS[c.value].length?s.f:0;
+ const upd=()=>{const L=UNITS[c.value],x=parseFloat(v.value),base=x*L[f.value][1];r.innerHTML=L.map(u=>`<div class="r"><span>${u[0]}</span><b>${fmt(base/u[1],6)}</b></div>`).join('');store.set('unit',{c:c.value,f:+f.value,v:v.value})};
+ c.onchange=()=>{fill();upd()};v.oninput=upd;f.onchange=upd;upd()}
+
+/* ================= TOOL: LEVELLING FIELD BOOK ================= */
+function levelBookTool(el){
+ let S=store.get('lvbook',{bm:100,rows:[{bs:'1.525',is:'',fs:'',rm:'BM'},{bs:'',is:'1.880',fs:'',rm:''},{bs:'2.015',is:'',fs:'1.240',rm:'CP1'},{bs:'',is:'',fs:'1.705',rm:''}]});
+ el.innerHTML=`<div class="card"><div class="form"><label class="fld"><span>RL of Bench Mark <em>m</em></span><input id="bm" type="number" step="any" inputmode="decimal" value="${S.bm}"></label></div><p class="hint">Height of Instrument (HI) method. Enter staff readings in metres. Row 1 = BS on the Bench Mark. Change point = enter FS and BS in the same row.</p></div>
+ <div class="card tscroll"><table class="lv"><thead><tr><th>#</th><th>BS</th><th>IS</th><th>FS</th><th>HI</th><th>RL</th><th>Remark</th><th></th></tr></thead><tbody></tbody></table><div class="row"><button class="btn" id="add">＋ Add row</button><button class="btn ghost" id="csv">Export CSV</button><button class="btn ghost" id="clr">Clear</button></div></div>
+ <div class="card"><h3>Arithmetic check</h3><div class="res" id="ck"></div></div>`;
+ const tb=$('tbody',el);let out=[];
+ const num=x=>x===''||x==null?NaN:parseFloat(x);
+ function compute(){let hi=NaN;out=S.rows.map((r,i)=>{const bs=num(r.bs),is=num(r.is),fs=num(r.fs);let rl=NaN,h='';if(i===0){rl=+S.bm;if(ok(bs)){hi=rl+bs;h=hi}}else if(ok(hi)){if(ok(fs)){rl=hi-fs;if(ok(bs)){hi=rl+bs;h=hi}}else if(ok(is))rl=hi-is}return{hi:h,rl}});
+  const sb=S.rows.reduce((a,r)=>a+(ok(num(r.bs))?num(r.bs):0),0),sf=S.rows.reduce((a,r)=>a+(ok(num(r.fs))?num(r.fs):0),0);const last=out.length?out[out.length-1].rl:NaN,first=+S.bm;
+  $('#ck',el).innerHTML=[['ΣBS',sb.toFixed(3)],['ΣFS',sf.toFixed(3)],['ΣBS − ΣFS',(sb-sf).toFixed(3)],['Last RL − First RL',ok(last)?(last-first).toFixed(3):'—'],['Check',ok(last)&&Math.abs((sb-sf)-(last-first))<0.0005?'<span class="good">✓ OK</span>':'<span class="warn">Last row must be a FS reading</span>']].map(r=>`<div class="r"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+  tb.querySelectorAll('tr').forEach((tr,i)=>{tr.children[4].textContent=ok(out[i].hi)?out[i].hi.toFixed(3):'';tr.children[5].textContent=ok(out[i].rl)?out[i].rl.toFixed(3):''});store.set('lvbook',S)}
+ function render(){tb.innerHTML=S.rows.map((r,i)=>`<tr><td>${i+1}</td>${['bs','is','fs'].map(k=>`<td><input data-i="${i}" data-k="${k}" type="number" step="any" inputmode="decimal" value="${r[k]}"></td>`).join('')}<td></td><td></td><td><input data-i="${i}" data-k="rm" value="${(r.rm||'').replace(/"/g,'&quot;')}" style="min-width:80px"></td><td><button class="btn ghost" data-del="${i}" style="padding:6px 10px">✕</button></td></tr>`).join('');compute()}
+ tb.addEventListener('input',e=>{const t=e.target;if(t.dataset.k){S.rows[t.dataset.i][t.dataset.k]=t.value;compute()}});
+ tb.addEventListener('click',e=>{const d=e.target.dataset.del;if(d!=null){S.rows.splice(+d,1);render()}});
+ $('#bm',el).oninput=e=>{S.bm=e.target.value;compute()};
+ $('#add',el).onclick=()=>{S.rows.push({bs:'',is:'',fs:'',rm:''});render()};
+ $('#clr',el).onclick=()=>{if(confirm('Clear the field book?')){S.rows=[{bs:'',is:'',fs:'',rm:'BM'}];render()}};
+ $('#csv',el).onclick=()=>{const L=['Station,BS,IS,FS,HI,RL,Remark'].concat(S.rows.map((r,i)=>[i+1,r.bs,r.is,r.fs,ok(out[i].hi)?out[i].hi.toFixed(3):'',ok(out[i].rl)?out[i].rl.toFixed(3):'','"'+(r.rm||'').replace(/"/g,'""')+'"'].join(',')));download('levelling-fieldbook.csv',new Blob([L.join('\n')],{type:'text/csv'}))};
+ render()}
+
+/* ================= REFERENCE ================= */
+function refTool(el){
+ const T=(h,rows)=>`<div class="tscroll"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ el.innerHTML=`<div class="card"><h3>Unit weight of materials (IS 875 Part 1, approx.)</h3>${T(['Material','kN/m³','kg/m³'],[['Plain cement concrete','24','2400'],['Reinforced concrete','25','2500'],['Brick masonry','19–20','1920–2000'],['Steel','78.5','7850'],['Cement','14.4','1440'],['Sand (dry)','15–16','1450–1600'],['Coarse aggregate','15–16','1500–1600'],['Water','9.81','1000']])}</div>
+ <div class="card"><h3>Nominal concrete mixes (IS 456, Table 9)</h3>${T(['Grade','Mix (C:FA:CA)','Typical use'],[['M5','1:5:10','Lean concrete'],['M7.5','1:4:8','Levelling / PCC bed'],['M10','1:3:6','PCC below footing'],['M15','1:2:4','PCC flooring, minor RCC'],['M20','1:1.5:3','RCC slab, beam, column (min. for RCC)'],['M25+','Design mix','IS 456 requires design mix (1:1:2 is a common thumb rule only)']])}</div>
+ <div class="card"><h3>Nominal cover to reinforcement (IS 456, Cl. 26.4)</h3>${T(['Exposure','Nominal cover'],[['Mild','20 mm'],['Moderate','30 mm'],['Severe','45 mm'],['Very severe','50 mm'],['Extreme','75 mm']])}<p class="hint">Columns: longitudinal bars ≥ 40 mm. Footings: ≥ 50 mm. For mild exposure with bars ≤ 12 mm, cover may be reduced by 5 mm.</p></div>
+ <div class="card"><h3>Formwork stripping time (IS 456, Cl. 11.3, OPC)</h3>${T(['Member','Minimum period'],[['Vertical faces (columns, walls, beam sides)','16–24 hours'],['Slab soffit (props left under)','3 days'],['Beam soffit (props left under)','7 days'],['Props – slabs span ≤ 4.5 m','7 days'],['Props – slabs span > 4.5 m','14 days'],['Props – beams/arches span ≤ 6 m','14 days'],['Props – beams/arches span > 6 m','21 days']])}</div>
+ <div class="card"><h3>Steel bar unit weight (D²/162 kg/m)</h3>${T(['Dia (mm)','kg/m','kg per 12 m bar'],[6,8,10,12,16,20,25,28,32].map(d=>[d,(d*d/162).toFixed(3),(d*d/162*12).toFixed(2)]))}<p class="hint">Development length (tension, Fe415, M20, deformed bars) ≈ 47φ. Fe500/M20 ≈ 57φ. Lap length in tension ≥ Ld (commonly 50φ used on site).</p></div>
+ <div class="card"><h3>Useful site data</h3>${T(['Item','Value'],[['1 cement bag','50 kg = 0.0347 m³ = 1.226 cft'],['1 brass','100 cft = 2.832 m³'],['1 m³','35.315 cft'],['Dry volume factor – concrete','1.54 (≈1.52–1.57)'],['Dry volume factor – mortar','1.27–1.33'],['Modular brick','190×90×90 mm (200×100×100 with mortar) ≈ 500 nos/m³'],['Conventional brick','230×110×75 mm ≈ 450–500 nos/m³'],['Curing (IS 456 13.5)','Min. 7 days OPC; 10 days with blended cement / hot-dry weather'],['Slump (IS 456)','Lightly reinforced 25–75 mm; heavily reinforced / pumped 75–100 mm'],['Water need (IS 1172)','135 L/person/day (residential with full sewerage)']])}</div>
+ <div class="card"><h3>Staircase &amp; building thumb rules (NBC 2016, residential)</h3>${T(['Item','Value'],[['Max. riser','190 mm'],['Min. tread','250 mm'],['Min. stair width (residential)','1.0 m (0.75 m for low-rise individual houses)'],['Min. headroom','2.2 m'],['Comfort rule','2R + T = 550–700 mm'],['Min. door height','2.0 m (approx. 2.1 m common)'],['Habitable room height','2.75 m (min.)']])}<p class="hint">Always check your local building bye-laws; they may differ.</p></div>`}
+
+/* ================= ABOUT ================= */
+function aboutTool(el){
+ el.innerHTML=`<div class="card"><h3>CivilKit v${APP_VERSION}</h3><p class="hint">All-in-one offline toolkit for civil engineers, architects and draughtsmen. Works without internet after first open. Install: browser menu → "Add to Home screen" / "Install app".</p><div class="row"><button class="btn" id="up">Check for updates</button><button class="btn ghost" id="inst" hidden>Install app</button></div><p class="hint" id="um"></p></div>
+ <div class="card"><h3>Accuracy &amp; disclaimer</h3><p class="hint">Sensor tools (AR tape, camera distance, level, compass, sound, GPS) depend on your phone's hardware; calibrate them and verify critical measurements with surveying instruments. Calculators use standard IS/NBC thumb rules and formulas for estimates; final design and quantities must be checked by a qualified engineer.</p></div>
+ <div class="card"><h3>Privacy</h3><p class="hint">Camera, microphone, motion and GPS data are processed only on your device and are never uploaded. Your inputs are stored only in this browser.</p></div>`;
+ $('#up',el).onclick=()=>checkUpdate($('#um',el));
+ if(window.__installEvt){const b=$('#inst',el);b.hidden=false;b.onclick=async()=>{window.__installEvt.prompt();window.__installEvt=null;b.hidden=true}}}
+
+/* ================= CALCULATOR SPECS ================= */
+const CALCS=[
+{id:'concrete',name:'Concrete Quantity',icon:'🏗️',desc:'Cement bags, sand, aggregate, water',fields:[
+ {k:'shape',label:'Member shape',type:'sel',def:'box',opts:[['box','Slab / beam / footing (rect.)'],['cyl','Round column / pile']]},
+ {k:'u',label:'Dimension unit',type:'sel',def:'m',opts:LU},
+ {k:'L',label:'Length',def:3,unit:ul,when:v=>v.shape==='box'},{k:'B',label:'Width',def:3,unit:ul,when:v=>v.shape==='box'},{k:'D',label:'Depth / thickness',def:0.125,unit:ul,when:v=>v.shape==='box'},
+ {k:'dia',label:'Diameter',def:0.45,unit:ul,when:v=>v.shape==='cyl'},{k:'H',label:'Height',def:3,unit:ul,when:v=>v.shape==='cyl'},
+ {k:'n',label:'Number of members',def:1},{k:'mix',label:'Grade / mix',type:'sel',def:'1:1.5:3',opts:MIXES},{k:'wc',label:'Water–cement ratio',def:0.45},{k:'w',label:'Wastage',def:2,unit:'%'}],
+ calc:v=>{const f=lf(v);const wet=(v.shape==='box'?v.L*v.B*v.D:Math.PI/4*v.dia*v.dia*v.H)*f*f*f*v.n;const dry=wet*1.54*(1+v.w/100);const[c,s,a]=mixParts(v.mix),S=c+s+a;const cm=dry*c/S*1440,sd=dry*s/S,ag=dry*a/S;
+  return{rows:[['Wet volume',vol(wet)],['Dry volume (×1.54 + wastage)',vol(dry)],['#','Materials'],['Cement',`${fmt(cm/50,1)} bags (${fmt(cm,0)} kg)`],['Sand',`${vol(sd)} · ${fmt(sd*35.3147/100,2)} brass`],['Aggregate (20 mm)',`${vol(ag)} · ${fmt(ag*35.3147/100,2)} brass`],['Water',`${fmt(cm*v.wc,0)} litres`]],note:v.mix==='1:1:2'?'* IS 456 requires a design mix for M25 and above; 1:1:2 is only an approximate site thumb rule.':''}},
+ info:'Wet volume = L×B×D (or π/4·d²·H) × count. Dry volume = wet × 1.54 (voids + bulkage). Cement = dry × (c/Σ) × 1440 kg/m³, 1 bag = 50 kg. Sand and aggregate = dry × share of mix. Water = cement kg × w/c ratio.'},
+{id:'brick',name:'Brickwork',icon:'🧱',desc:'Bricks, mortar, cement & sand for walls',fields:[
+ {k:'u',label:'Dimension unit',type:'sel',def:'m',opts:LU},{k:'L',label:'Wall length',def:5,unit:ul},{k:'H',label:'Wall height',def:3,unit:ul},
+ {k:'t',label:'Wall thickness',type:'sel',def:'0.23',opts:[['0.23','230 mm (9″)'],['0.115','115 mm (4½″)'],['0.2','200 mm (modular)'],['0.1','100 mm (modular)'],['0.35','350 mm (13½″)']]},
+ {k:'op',label:'Openings to deduct',def:0,unit:ua},{k:'br',label:'Brick size',type:'sel',def:'190x90x90',opts:[['190x90x90','190×90×90 mm (modular)'],['230x110x75','230×110×75 mm (conventional)'],['230x115x75','230×115×75 mm'],['400x200x200','400×200×200 mm (AAC/block)'],['600x200x200','600×200×200 mm (AAC block)']]},
+ {k:'mt',label:'Mortar joint',def:10,unit:'mm'},{k:'mix',label:'Mortar ratio',type:'sel',def:'6',opts:[['3','1:3'],['4','1:4'],['5','1:5'],['6','1:6']]},{k:'w',label:'Brick wastage',def:5,unit:'%'}],
+ calc:v=>{const f=lf(v);const area=v.L*v.H*f*f-(v.op||0)*f*f,V=area*(+v.t);const[l,b,h]=v.br.split('x').map(x=>+x/1000),m=v.mt/1000;const one=(l+m)*(b+m)*(h+m);const n=V/one;const wet=V-n*l*b*h,dry=wet*1.33;const mix=+v.mix;const cm=dry/(1+mix)*1440,sd=dry*mix/(1+mix);
+  return[['Wall area (net)',fmt(area,2)+' m² · '+fmt(area/0.0929,1)+' ft²'],['Wall volume',vol(V)],['#','Materials'],['Bricks / blocks',`${fmt(Math.ceil(n*(1+v.w/100)),0)} nos (${fmt(n,0)} + ${v.w}% wastage)`],['Mortar (wet → dry ×1.33)',`${fmt(wet,3)} → ${fmt(dry,3)} m³`],['Cement',`${fmt(cm/50,1)} bags`],['Sand',`${vol(sd)}`]]},
+ info:'Bricks = wall volume ÷ volume of one brick including mortar. Wet mortar = wall volume − volume of bricks. Dry mortar = wet × 1.33. Cement = dry/(1+n) × 1440 kg/m³; sand = dry × n/(1+n).'},
+{id:'plaster',name:'Plaster',icon:'🪣',desc:'Cement & sand for plastering',fields:[
+ {k:'u',label:'Dimension unit',type:'sel',def:'m',opts:LU},{k:'A',label:'Plaster area',def:100,unit:ua},{k:'t',label:'Thickness',type:'sel',def:'12',opts:[['6','6 mm (ceiling)'],['12','12 mm (internal)'],['15','15 mm'],['20','20 mm (external)']]},
+ {k:'mix',label:'Ratio',type:'sel',def:'4',opts:[['3','1:3'],['4','1:4'],['5','1:5'],['6','1:6']]},{k:'df',label:'Dry factor',def:1.27}],
+ calc:v=>{const f=lf(v);const A=v.A*f*f;const wet=A*v.t/1000,dry=wet*v.df;const n=+v.mix;const cm=dry/(1+n)*1440;return[['Area',fmt(A,2)+' m² · '+fmt(A/0.0929,1)+' ft²'],['Wet mortar',vol(wet)],['Dry mortar',vol(dry)],['Cement',`${fmt(cm/50,1)} bags (${fmt(cm,0)} kg)`],['Sand',vol(dry*n/(1+n))]]},
+ info:'Wet volume = area × thickness. Dry volume = wet × 1.27 (bulkage + filling joints + wastage; use 1.33 for rough surfaces).'},
+{id:'steel',name:'Steel / Rebar Weight',icon:'🔩',desc:'D²/162 bar weight & total tonnage',fields:[
+ {k:'d',label:'Bar diameter',type:'sel',def:'12',opts:[6,8,10,12,16,20,25,28,32,36,40].map(x=>[String(x),x+' mm'])},{k:'L',label:'Length of one bar',def:12,unit:'m'},{k:'n',label:'Number of bars',def:10}],
+ calc:v=>{const kgm=v.d*v.d/162,t=kgm*v.L*v.n;return[['Unit weight',fmt(kgm,3)+' kg/m'],['Weight of one bar',fmt(kgm*v.L,2)+' kg'],['Total weight',fmt(t,2)+' kg'],['Total',fmt(t/1000,3)+' tonne'],['Bars of 12 m per tonne',fmt(1000/(kgm*12),1)+' nos']]},
+ info:'Weight per metre = D² / 162 kg (D in mm). Derived from steel density 7850 kg/m³: π/4 × D² × 7850 / 10⁶ = D²/162.2.'},
+{id:'stirrup',name:'Stirrup Cutting Length',icon:'➰',desc:'BBS for rectangular stirrups',fields:[
+ {k:'b',label:'Beam/column width',def:230,unit:'mm'},{k:'D',label:'Beam/column depth',def:450,unit:'mm'},{k:'c',label:'Clear cover',def:25,unit:'mm'},{k:'d',label:'Stirrup bar dia',type:'sel',def:'8',opts:[['6','6 mm'],['8','8 mm'],['10','10 mm'],['12','12 mm']]},{k:'hk',label:'Hook length each (×d)',def:10},{k:'sp',label:'Spacing',def:150,unit:'mm'},{k:'Lm',label:'Member length',def:4000,unit:'mm'}],
+ calc:v=>{const d=+v.d,a=v.b-2*v.c-d,b=v.D-2*v.c-d;const hook=Math.max(v.hk*d,75);const cl=2*(a+b)+2*hook-3*2*d-2*3*d;const n=Math.floor(v.Lm/v.sp)+1;const kg=d*d/162*cl/1000*n;
+  return[['Centre-line size',`${fmt(a,0)} × ${fmt(b,0)} mm`],['Hook length (each)',fmt(hook,0)+' mm'],['Cutting length',`<span class="good">${fmt(cl,0)} mm</span>`],['No. of stirrups',n+' nos'],['Total steel',fmt(kg,2)+' kg']]},
+ info:'Cutting length = 2(a+b) + 2×hook − bend deductions (3 bends of 90° × 2d + 2 bends of 135° × 3d). a, b = member size − 2×cover − d (centre-line). Hook = 10d (min 75 mm) per IS 2502/IS 13920. Check the drawing\'s BBS notes; site practice varies.'},
+{id:'stair',name:'Staircase Designer',icon:'🪜',desc:'Risers, treads, going, slope & checks',fields:[
+ {k:'H',label:'Floor-to-floor height',def:3000,unit:'mm'},{k:'R',label:'Max. riser',def:175,unit:'mm'},{k:'T',label:'Tread (going)',def:250,unit:'mm'},{k:'W',label:'Stair width',def:1000,unit:'mm'},{k:'fl',label:'Flights',type:'sel',def:'2',opts:[['1','1 (straight)'],['2','2 (dog-legged)'],['3','3']]}],
+ calc:v=>{const n=Math.ceil(v.H/v.R),r=v.H/n,fl=+v.fl;const perF=n/fl,treads=n-fl;const go=Math.ceil(perF-1)*v.T;const ang=deg(Math.atan(r/v.T));const wl=Math.hypot(v.H/fl,go);const br=2*r+ +v.T;
+  return[['Number of risers',n+' nos'],['Actual riser',fmt(r,1)+' mm'],['Number of treads (total)',treads+' nos'],['Risers per flight',fmt(perF,1)],['Going per flight',fmt(go,0)+' mm'],['Pitch angle',fmt(ang,1)+'°'],['Inclined length per flight',fmt(wl,0)+' mm'],['#','Checks'],['Riser ≤ 190 mm (NBC)',chk(r<=190,fmt(r,0)+' mm')],['Tread ≥ 250 mm (NBC)',chk(v.T>=250,v.T+' mm')],['2R + T = 550–700',chk(br>=550&&br<=700,fmt(br,0)+' mm')],['Angle 25°–40° (comfortable)',chk(ang>=25&&ang<=40,fmt(ang,1)+'°')],['Width ≥ 1000 mm',chk(v.W>=1000,v.W+' mm')]]},
+ info:'Risers = ceil(height ÷ max riser). Treads = risers − number of flights (landing replaces the last tread of each flight). Blondel rule 2R + T ≈ 600–630 mm is ideal.'},
+{id:'area',name:'Area & Land Calculator',icon:'📐',desc:'Shapes, triangle by 3 sides, 4-side plots',fields:[
+ {k:'shape',label:'Shape',type:'sel',def:'quad',opts:[['rect','Rectangle'],['tri3','Triangle – 3 sides'],['tribh','Triangle – base & height'],['circle','Circle'],['trap','Trapezium'],['quad','Irregular 4-side plot + diagonal']]},
+ {k:'u',label:'Unit',type:'sel',def:'ft',opts:LU},
+ {k:'L',label:'Length',def:40,unit:ul,when:v=>v.shape==='rect'},{k:'B',label:'Width',def:30,unit:ul,when:v=>v.shape==='rect'},
+ {k:'a',label:'Side a',def:30,unit:ul,when:v=>v.shape==='tri3'},{k:'b',label:'Side b',def:40,unit:ul,when:v=>v.shape==='tri3'},{k:'c',label:'Side c',def:50,unit:ul,when:v=>v.shape==='tri3'},
+ {k:'bs',label:'Base',def:40,unit:ul,when:v=>v.shape==='tribh'},{k:'ht',label:'Height',def:25,unit:ul,when:v=>v.shape==='tribh'},
+ {k:'dia',label:'Diameter',def:10,unit:ul,when:v=>v.shape==='circle'},
+ {k:'p1',label:'Parallel side 1',def:30,unit:ul,when:v=>v.shape==='trap'},{k:'p2',label:'Parallel side 2',def:40,unit:ul,when:v=>v.shape==='trap'},{k:'ph',label:'Height (perpendicular)',def:50,unit:ul,when:v=>v.shape==='trap'},
+ {k:'AB',label:'Side AB',def:40,unit:ul,when:v=>v.shape==='quad'},{k:'BC',label:'Side BC',def:60,unit:ul,when:v=>v.shape==='quad'},{k:'CD',label:'Side CD',def:42,unit:ul,when:v=>v.shape==='quad'},{k:'DA',label:'Side DA',def:58,unit:ul,when:v=>v.shape==='quad'},{k:'AC',label:'Diagonal AC',def:72,unit:ul,when:v=>v.shape==='quad'}],
+ calc:v=>{const f=lf(v);const her=(a,b,c)=>{const s=(a+b+c)/2,q=s*(s-a)*(s-b)*(s-c);return q>=0?Math.sqrt(q):NaN};let A,P,bad='';
+  switch(v.shape){case'rect':A=v.L*v.B;P=2*(v.L+v.B);break;case'tri3':A=her(v.a,v.b,v.c);P=v.a+v.b+v.c;if(!ok(A))bad='These 3 sides cannot form a triangle.';break;case'tribh':A=v.bs*v.ht/2;P=NaN;break;case'circle':A=Math.PI*v.dia*v.dia/4;P=Math.PI*v.dia;break;case'trap':A=(v.p1+v.p2)/2*v.ph;P=NaN;break;case'quad':{const t1=her(v.AB,v.BC,v.AC),t2=her(v.CD,v.DA,v.AC);A=t1+t2;P=v.AB+v.BC+v.CD+v.DA;if(!ok(A))bad='Sides and diagonal do not close – re-check the measurements.'}}
+  const Am=A*f*f;return{rows:[['Perimeter',ok(P)?fmt(P,2)+' '+ul(v)+(v.u==='ft'?' · '+fmt(P*f,2)+' m':' · '+fmt(P/0.3048,2)+' ft'):'—']].concat(AREA_U.map(u=>[u[1],fmt(Am/u[2],u[2]>1000?4:2)])),note:bad?`<span class="bad">${bad}</span>`:''}},
+ info:'Triangle from 3 sides uses Heron\'s formula √(s(s−a)(s−b)(s−c)). A 4-sided plot is split along diagonal AC into two triangles. Measure the diagonal on site with a tape for any irregular plot.'},
+{id:'paint',name:'Paint, Primer & Putty',icon:'🎨',desc:'Litres and kg for a room',fields:[
+ {k:'u',label:'Unit',type:'sel',def:'ft',opts:LU},{k:'L',label:'Room length',def:12,unit:ul},{k:'B',label:'Room width',def:10,unit:ul},{k:'H',label:'Wall height',def:10,unit:ul},
+ {k:'ceil',label:'Include ceiling',type:'sel',def:'y',opts:[['y','Yes'],['n','No']]},{k:'op',label:'Doors/windows area',def:40,unit:ua},{k:'coats',label:'Paint coats',def:2},{k:'cov',label:'Paint coverage (per coat)',def:100,unit:'ft²/L'},{k:'pcov',label:'Primer coverage',def:120,unit:'ft²/L'},{k:'ptc',label:'Putty coverage (2 coats)',def:10,unit:'ft²/kg'}],
+ calc:v=>{const f=lf(v);let A=(2*(v.L+v.B)*v.H+(v.ceil==='y'?v.L*v.B:0)-(v.op||0))*f*f;const sq=A/0.09290304;return[['Paintable area',fmt(sq,0)+' ft² · '+fmt(A,1)+' m²'],['Paint',fmt(sq*v.coats/v.cov,1)+' litres'],['Primer (1 coat)',fmt(sq/v.pcov,1)+' litres'],['Wall putty',fmt(sq/v.ptc,1)+' kg']]},
+ info:'Area = perimeter × height (+ ceiling) − openings. Coverage values vary by brand; check the paint tin (emulsion ≈ 90–120 ft²/L/coat).'},
+{id:'tiles',name:'Tiles / Flooring',icon:'🔲',desc:'Number of tiles & boxes',fields:[
+ {k:'u',label:'Unit',type:'sel',def:'ft',opts:LU},{k:'L',label:'Floor length',def:12,unit:ul},{k:'B',label:'Floor width',def:10,unit:ul},
+ {k:'ts',label:'Tile size',type:'sel',def:'600x600',opts:[['300x300','300×300 mm (1×1 ft)'],['400x400','400×400 mm'],['600x600','600×600 mm (2×2 ft)'],['600x1200','600×1200 mm (2×4 ft)'],['800x800','800×800 mm'],['800x1600','800×1600 mm'],['300x600','300×600 mm (wall)'],['250x375','250×375 mm (wall)']]},
+ {k:'pb',label:'Tiles per box',def:4},{k:'w',label:'Wastage (cutting)',def:7,unit:'%'}],
+ calc:v=>{const f=lf(v);const A=v.L*v.B*f*f;const[a,b]=v.ts.split('x').map(x=>+x/1000);const n=Math.ceil(A/(a*b)*(1+v.w/100));return[['Floor area',fmt(A,2)+' m² · '+fmt(A/0.0929,1)+' ft²'],['Tiles required',n+' nos'],['Boxes',Math.ceil(n/v.pb)+' boxes'],['Skirting length (approx.)',fmt(2*(v.L+v.B),1)+' '+ul(v)]]},
+ info:'Tiles = floor area ÷ tile area × (1 + wastage). Use 5% for straight laying, 10–15% for diagonal laying.'},
+{id:'excav',name:'Excavation / Earthwork',icon:'⛏️',desc:'Soil volume, swell & truck trips',fields:[
+ {k:'u',label:'Unit',type:'sel',def:'m',opts:LU},{k:'L',label:'Length',def:10,unit:ul},{k:'B',label:'Width',def:1.2,unit:ul},{k:'D',label:'Depth',def:1.5,unit:ul},{k:'n',label:'Number of pits/trenches',def:1},
+ {k:'sw',label:'Swell / bulking',def:25,unit:'%'},{k:'tc',label:'Truck/tractor capacity',def:6,unit:'m³'}],
+ calc:v=>{const f=lf(v);const V=v.L*v.B*v.D*f*f*f*v.n,Lv=V*(1+v.sw/100);return[['Bank (in-situ) volume',vol(V)+' · '+fmt(V*35.3147/100,2)+' brass'],['Loose volume',vol(Lv)],['Trips',Math.ceil(Lv/v.tc)+' trips']]},
+ info:'Typical swell: sand 10–15%, ordinary soil 20–30%, clay 30–40%, rock 50–60%.'},
+{id:'slope',name:'Slope / Gradient Converter',icon:'📉',desc:'Degrees ⇄ % ⇄ 1 in n ⇄ rise/run',fields:[
+ {k:'m',label:'Input type',type:'sel',def:'deg',opts:[['deg','Angle (degrees)'],['pct','Gradient (%)'],['ratio','1 in n'],['rr','Rise & run']]},
+ {k:'a',label:'Angle',def:30,unit:'°',when:v=>v.m==='deg'},{k:'p',label:'Gradient',def:2,unit:'%',when:v=>v.m==='pct'},{k:'n',label:'n (1 in n)',def:12,when:v=>v.m==='ratio'},{k:'rise',label:'Rise',def:1,when:v=>v.m==='rr'},{k:'run',label:'Run',def:4,when:v=>v.m==='rr'}],
+ calc:v=>{let t;switch(v.m){case'deg':t=Math.tan(rad(v.a));break;case'pct':t=v.p/100;break;case'ratio':t=1/v.n;break;default:t=v.rise/v.run}const a=deg(Math.atan(t));return[['Angle',fmt(a,3)+'°'],['Gradient',fmt(t*100,3)+' %'],['1 in n',t?'1 in '+fmt(1/t,2):'—'],['Rise per metre',fmt(t*1000,1)+' mm'],['Rise per foot',fmt(t*12,3)+' inch'],['Roof pitch',fmt(t*12,2)+' : 12'],['Slope length per 1 m run',fmt(Math.hypot(1,t),4)+' m']]},
+ info:'Typical: drains 1 in 100–200; ramps max 1 in 12 (wheelchair); roads camber 1 in 40–60; RCC roof 1 in 100.'},
+{id:'beam',name:'Beam Quick Check',icon:'📏',desc:'Reactions, moment, shear, deflection',fields:[
+ {k:'sup',label:'Support',type:'sel',def:'ss',opts:[['ss','Simply supported'],['cant','Cantilever'],['fix','Fixed both ends']]},{k:'L',label:'Span',def:4,unit:'m'},{k:'w',label:'UDL (incl. self weight)',def:15,unit:'kN/m'},{k:'P',label:'Point load (mid-span / free end)',def:0,unit:'kN'},
+ {k:'b',label:'Width b',def:230,unit:'mm'},{k:'D',label:'Depth D',def:450,unit:'mm'},{k:'E',label:'Elastic modulus E',def:25,unit:'GPa'}],
+ calc:v=>{const L=v.L,w=v.w||0,P=v.P||0,I=v.b*Math.pow(v.D,3)/12,E=v.E*1000,Lm=L*1000;let R,V,M,dl;
+  if(v.sup==='ss'){R=w*L/2+P/2;V=R;M=w*L*L/8+P*L/4;dl=5*w*Math.pow(Lm,4)/(384*E*I)+P*1000*Math.pow(Lm,3)/(48*E*I)}
+  else if(v.sup==='cant'){R=w*L+P;V=R;M=w*L*L/2+P*L;dl=w*Math.pow(Lm,4)/(8*E*I)+P*1000*Math.pow(Lm,3)/(3*E*I)}
+  else{R=w*L/2+P/2;V=R;M=w*L*L/12+P*L/8;dl=w*Math.pow(Lm,4)/(384*E*I)+P*1000*Math.pow(Lm,3)/(192*E*I)}
+  const Z=v.b*v.D*v.D/6,sig=M*1e6/Z;const lim=v.sup==='cant'?Lm/125:Lm/250;
+  return{rows:[['Support reaction (each/fixed end)',fmt(R,2)+' kN'],['Max. shear force',fmt(V,2)+' kN'],['Max. bending moment',fmt(M,2)+' kN·m'],['Moment of inertia I',fmt(I/1e6,1)+' ×10⁶ mm⁴'],['Bending stress M/Z',fmt(sig,2)+' N/mm²'],['Max. deflection (gross section)',fmt(dl,2)+' mm'],['Limit span/250 (cantilever /125)',chk(dl<=lim,fmt(lim,1)+' mm')]],note:'Elastic analysis for quick checks only. RCC design must follow IS 456 (limit state, cracked section, long-term deflection).'}},
+ info:'SS: M = wL²/8 + PL/4, δ = 5wL⁴/384EI + PL³/48EI. Cantilever: M = wL²/2 + PL, δ = wL⁴/8EI + PL³/3EI. Fixed: M = wL²/12 + PL/8, δ = wL⁴/384EI + PL³/192EI. Concrete E = 5000√fck MPa (M25 = 25 GPa).'},
+{id:'tank',name:'Water Tank & Sump',icon:'💧',desc:'Capacity and requirement',fields:[
+ {k:'sh',label:'Shape',type:'sel',def:'rect',opts:[['rect','Rectangular'],['cyl','Cylindrical']]},{k:'u',label:'Unit',type:'sel',def:'ft',opts:LU},
+ {k:'L',label:'Length',def:8,unit:ul,when:v=>v.sh==='rect'},{k:'B',label:'Width',def:6,unit:ul,when:v=>v.sh==='rect'},{k:'dia',label:'Diameter',def:6,unit:ul,when:v=>v.sh==='cyl'},{k:'H',label:'Water depth',def:5,unit:ul},
+ {k:'p',label:'Persons',def:5},{k:'lpcd',label:'Water per person per day',def:135,unit:'L'},{k:'days',label:'Storage days',def:1}],
+ calc:v=>{const f=lf(v);const V=(v.sh==='rect'?v.L*v.B:Math.PI/4*v.dia*v.dia)*v.H*f*f*f;const need=v.p*v.lpcd*v.days;return[['Tank capacity',fmt(V*1000,0)+' litres'],['',vol(V)],['Required storage',fmt(need,0)+' litres'],['Status',chk(V*1000>=need,V*1000>=need?'Sufficient':'Short by '+fmt(need-V*1000,0)+' L')]]},
+ info:'1 m³ = 1000 L; 1 cft = 28.317 L. IS 1172: 135 LPCD for residences with full flushing. Keep 150–300 mm free board above water depth.'},
+{id:'cost',name:'House Construction Cost',icon:'💰',desc:'Thumb-rule cost & material estimate',fields:[
+ {k:'A',label:'Built-up area',def:1000,unit:'ft²'},{k:'r',label:'Construction rate',def:1800,unit:'₹/ft²'}],
+ calc:v=>{const T=v.A*v.r;const br=[['Cement',16.4],['Sand',12.3],['Aggregate',7.4],['Steel',24.6],['Paint',4.1],['Bricks',4.4],['Tiles / flooring',8],['Windows',3],['Doors',3.4],['Plumbing',5.5],['Electrical',6.8],['Sanitary',4.1]];
+  return{rows:[['Total estimated cost','₹ '+fmt(T,0)],['#','Cost split (thumb rule)']].concat(br.map(b=>[b[0]+' ('+b[1]+'%)','₹ '+fmt(T*b[1]/100,0)])).concat([['#','Approx. materials'],['Cement',fmt(v.A*0.4,0)+' bags'],['Sand',fmt(v.A*1.816,0)+' cft'],['Aggregate',fmt(v.A*1.35,0)+' cft'],['Steel',fmt(v.A*4/1000,2)+' tonne'],['Bricks',fmt(v.A*8,0)+' nos'],['Paint',fmt(v.A*0.18,0)+' litres'],['Flooring tiles',fmt(v.A*1.3,0)+' ft²']]),note:'Widely used Indian thumb rules for a G+0/G+1 RCC frame house. Labour is included in the rate. Actual quantities come from a detailed estimate (BOQ).'}}}
+];
+
+/* ================= REGISTRY & ROUTER ================= */
+const CATS=[['m','Measure with camera & sensors'],['q','Quantity calculators'],['d','Design & survey'],['r','Converters & reference']];
+const TOOLS=[
+ {id:'north',cat:'m',icon:'⬆️',name:'North Finder',desc:'Compass + true north by sun & shadow',render:northTool},
+ {id:'rightangle',cat:'m',icon:'⟂',name:'Wall 90° Marking',desc:'3-4-5 tape method + phone guide',render:rightAngleTool},
+ {id:'ar',cat:'m',icon:'📱',name:'AR Tape Measure',desc:'Real 3D distances using camera',render:arTool},
+ {id:'camdist',cat:'m',icon:'🎯',name:'Camera Distance & Height',desc:'Distance & height of buildings, poles, trees',render:camDistTool},
+ {id:'protractor',cat:'m',icon:'📐',name:'Virtual Protractor',desc:'Measure angles on camera view',render:protractorTool},
+ {id:'level',cat:'m',icon:'🟢',name:'Spirit Level & Plumb',desc:'Bubble level, edge level, plumb',render:levelTool},
+ {id:'clino',cat:'m',icon:'⛰️',name:'Clinometer / Slope',desc:'Angle, gradient %, 1 in n',render:clinoTool},
+ {id:'compass',cat:'m',icon:'🧭',name:'Compass & Bearing',desc:'Plot facing, bearing between lines',render:compassTool},
+ {id:'ruler',cat:'m',icon:'📏',name:'Screen Ruler',desc:'Calibrated mm & inch ruler',render:rulerTool},
+ {id:'gps',cat:'m',icon:'🗺️',name:'GPS Plot Area',desc:'Walk the boundary → area in acre, gunta…',render:gpsTool},
+ {id:'sound',cat:'m',icon:'🔊',name:'Sound Level Meter',desc:'Site noise in dB',render:soundTool},
+ {id:'torch',cat:'m',icon:'🔦',name:'Torch',desc:'Flash light for inspection',render:torchTool},
+ ...CALCS.filter(c=>['concrete','brick','plaster','steel','tiles','paint','excav','cost'].includes(c.id)).map(c=>({id:c.id,cat:'q',icon:c.icon,name:c.name,desc:c.desc,render:calcTool(c)})),
+ ...CALCS.filter(c=>['stair','beam','stirrup','area','tank','slope'].includes(c.id)).map(c=>({id:c.id,cat:'d',icon:c.icon,name:c.name,desc:c.desc,render:calcTool(c)})),
+ {id:'levelbook',cat:'d',icon:'📊',name:'Levelling Field Book',desc:'HI method RLs + arithmetic check',render:levelBookTool},
+ {id:'units',cat:'r',icon:'🔁',name:'Unit Converter',desc:'Length, area (gunta, cent), brass, stress…',render:unitTool},
+ {id:'ref',cat:'r',icon:'📘',name:'Civil Reference (IS / NBC)',desc:'Cover, mixes, stripping time, unit weights',render:refTool},
+ {id:'about',cat:'r',icon:'ℹ️',name:'About & Updates',desc:'Install, update, accuracy notes',render:aboutTool}];
+const app=$('#app'),titleEl=$('#title'),backBtn=$('#back');let cleanup=null;
+function renderHome(){app.innerHTML=`<input class="search" id="q" type="search" placeholder="Search ${TOOLS.length} tools…"><div id="list"></div>`;const list=$('#list');
+ const draw=q=>{q=(q||'').toLowerCase();list.innerHTML=CATS.map(([k,n])=>{const ts=TOOLS.filter(t=>t.cat===k&&(!q||(t.name+' '+t.desc).toLowerCase().includes(q)));return ts.length?`<div class="cat">${n}</div><div class="grid">${ts.map(t=>`<button class="tile" data-id="${t.id}"><span class="ic">${t.icon}</span><b>${t.name}</b><small>${t.desc}</small></button>`).join('')}</div>`:''}).join('')||'<p class="hint">No tool found.</p>'};
+ draw();$('#q').oninput=e=>draw(e.target.value);list.onclick=e=>{const b=e.target.closest('.tile');if(b)location.hash=b.dataset.id}}
+function route(){if(cleanup){try{cleanup()}catch(e){}cleanup=null}const id=location.hash.slice(1);const t=TOOLS.find(x=>x.id===id);app.innerHTML='';
+ if(!t){titleEl.textContent='CivilKit';backBtn.hidden=true;renderHome()}else{titleEl.textContent=t.name;backBtn.hidden=false;const r=t.render(app);cleanup=typeof r==='function'?r:null}window.scrollTo(0,0)}
+backBtn.onclick=()=>{if(history.length>1&&location.hash)history.back();else location.hash=''};
+window.addEventListener('hashchange',route);
+/* theme */
+const applyTheme=t=>{if(t)document.documentElement.dataset.theme=t;else delete document.documentElement.dataset.theme};applyTheme(store.get('theme',''));
+$('#themeBtn').onclick=()=>{const cur=store.get('theme','');const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme:dark)').matches;const n=dark?'light':'dark';store.set('theme',n);applyTheme(n)};
+/* install & service worker */
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installEvt=e});
+let hadCtl=false,reloading=false;
+if('serviceWorker' in navigator&&location.protocol!=='file:'){hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!reloading){reloading=true;location.reload()}})}
+async function checkUpdate(msg){if(!('serviceWorker' in navigator)){msg.textContent='Offline mode not supported in this browser.';return}msg.textContent='Checking…';try{const reg=await navigator.serviceWorker.getRegistration();if(!reg){msg.textContent='Offline mode not active yet (open from the web link).';return}await reg.update();
+ const w=reg.waiting||reg.installing;if(!w){msg.textContent='✓ You have the latest version ('+APP_VERSION+').';return}msg.textContent='Updating…';hadCtl=true;const go=sw=>sw.postMessage('skip');if(reg.waiting)go(reg.waiting);else w.addEventListener('statechange',()=>{if(w.state==='installed')go(w)})}catch(e){msg.textContent='Could not check (are you offline?)'}}
+route();
+</script>
+</body>
+</html>
